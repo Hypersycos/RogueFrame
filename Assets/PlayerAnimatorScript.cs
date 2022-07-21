@@ -25,23 +25,27 @@ namespace Hypersycos.RogueFrame.Input
             Vector3 horizontalVelocity = characterController.velocity;
             horizontalVelocity.y = 0;
 
-            animator.SetFloat("Speed", horizontalVelocity.magnitude / controllerScript.maxSpeed);
+            float speed = horizontalVelocity.magnitude / controllerScript.maxSpeed;
+            bool isGrounded = controllerScript.IsGrounded();
+            animator.SetFloat("Speed", speed, 0.1f, Time.deltaTime);
             float animatorSpeed = controllerScript.movementModifiers;
             float velocity = horizontalVelocity.magnitude;
             float walkThreshold = Mathf.Min(runSpeedNormal / 2, controllerScript.maxSpeed / 2);
-            if (horizontalVelocity != Vector3.zero)
+            if (horizontalVelocity != Vector3.zero && isGrounded)
             {
-                if (velocity < walkThreshold)
-                {
-                    animatorSpeed = velocity / (walkThreshold);
-                }
-                else
+                if (controllerScript.crouching)
                 {
                     animatorSpeed = velocity / (runSpeedNormal);
                 }
+                else
+                {
+                    float speed1 = Mathf.Min(1f, velocity / (walkThreshold));
+                    float speed2 = velocity / (runSpeedNormal);
+                    animatorSpeed = Mathf.Lerp(speed1, speed2, 2 * (speed - 0.5f));
+                }
             }
-            animator.SetFloat("MotionSpeed", animatorSpeed);
-            animator.SetBool("Grounded", controllerScript.IsGrounded());
+            animator.SetFloat("MotionSpeed", animatorSpeed, 0.1f, Time.deltaTime);
+            animator.SetBool("Grounded", isGrounded);
             if (waitForJump)
             {
                 if (characterController.velocity.y > 0)
@@ -70,6 +74,15 @@ namespace Hypersycos.RogueFrame.Input
         {
             waitForJump = true;
             animator.SetBool("Jump", true);
+        }
+
+        public void SetCrouching(bool isCrouching)
+        {
+            Vector3 horizontalVelocity = characterController.velocity;
+            horizontalVelocity.y = 0;
+
+            animator.SetFloat("Speed", horizontalVelocity.magnitude / controllerScript.maxSpeed);
+            animator.SetBool("Crouching", isCrouching);
         }
     }
 }

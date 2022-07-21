@@ -32,7 +32,7 @@ namespace Hypersycos.RogueFrame.Input
         [SerializeField] private Vector3 velocity = Vector3.zero;
         private Vector3 horizontalVelocity { get { return new Vector3(velocity.x, 0, velocity.z); } }
 
-        private bool crouching = false;
+        public bool crouching { get; private set; } = false;
         [SerializeField] private float crouchSpeed = 0.4f;
         [SerializeField] private float slideThreshold = 0.5f;
         [SerializeField] private float slideImpulse = 0.5f;
@@ -112,6 +112,7 @@ namespace Hypersycos.RogueFrame.Input
             {
                 RemoveMovementModifier("crouching");
             }
+            animatorScript.SetCrouching(crouching);
         }
 
         public override void OnNetworkDespawn()
@@ -124,7 +125,12 @@ namespace Hypersycos.RogueFrame.Input
 
         private void FixedUpdate()
         {
-            if (move == null) return;
+            if (move == null)
+            {
+                move = ControlAsset.Player.Move;
+                if (move == null)
+                    return;
+            }
             Vector3 inputForce = Vector3.zero;
             inputForce += move.ReadValue<Vector2>().x * GetCameraRight(playerCamera) * moveForce * Time.fixedDeltaTime;
             inputForce += move.ReadValue<Vector2>().y * GetCameraForward(playerCamera) * moveForce * Time.fixedDeltaTime;
@@ -177,7 +183,7 @@ namespace Hypersycos.RogueFrame.Input
                 }
             }
             characterController.Move(velocity * Time.fixedDeltaTime);
-            if (IsGrounded() && velocity.y < 0f)
+            if (IsGrounded() && velocity.y <= 0f)
             {
                 velocity.y = 0;
                 jumpsAvailable = maxJumps;
