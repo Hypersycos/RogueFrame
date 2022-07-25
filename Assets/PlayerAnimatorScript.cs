@@ -1,20 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Hypersycos.RogueFrame.Input
 {
-    public class PlayerAnimatorScript : MonoBehaviour
+    public class PlayerAnimatorScript : NetworkBehaviour
     {
         private Animator animator;
         private Controller controllerScript;
         private CharacterController characterController;
-        private bool waitForJump = false;
         [SerializeField] float runSpeedNormal = 5f;
+        private float airtime = 2f;
         // Start is called before the first frame update
-        void Start()
+        public override void OnNetworkSpawn()
         {
             animator = GetComponent<Animator>();
+            if (IsLocalPlayer)
+            {
+                enabled = true;
+            }
+            else
+            {
+                return;
+            }
             controllerScript = GetComponent<Controller>();
             characterController = GetComponent<CharacterController>();
         }
@@ -22,8 +31,7 @@ namespace Hypersycos.RogueFrame.Input
         // Update is called once per frame
         void Update()
         {
-            Vector3 horizontalVelocity = characterController.velocity;
-            horizontalVelocity.y = 0;
+            Vector3 horizontalVelocity = controllerScript.horizontalVelocity;
 
             float speed = horizontalVelocity.magnitude / controllerScript.maxSpeed;
             bool isGrounded = controllerScript.IsGrounded();
@@ -35,7 +43,7 @@ namespace Hypersycos.RogueFrame.Input
             {
                 if (controllerScript.crouching)
                 {
-                    animatorSpeed = velocity / (runSpeedNormal);
+                    animatorSpeed = velocity / (runSpeedNormal) / controllerScript.crouchSpeed;
                 }
                 else
                 {
@@ -46,43 +54,53 @@ namespace Hypersycos.RogueFrame.Input
             }
             animator.SetFloat("MotionSpeed", animatorSpeed, 0.1f, Time.deltaTime);
             animator.SetBool("Grounded", isGrounded);
-            if (waitForJump)
+            if (Mathf.Abs(controllerScript.intendedVelocity.y) >= 0.5f && !animator.GetBool("Jump") && !isGrounded)
             {
-                if (characterController.velocity.y > 0)
-                {
-                    waitForJump = false;
-                }
+                airtime += Time.deltaTime;
             }
-            else
+            else if (isGrounded)
             {
-                if (characterController.velocity.y <= 0f)
-                {
-                    animator.SetBool("Jump", false);
-                }
-                if (characterController.velocity.y <= -0.5f)
-                {
-                    animator.SetBool("FreeFall", true);
-                }
-                else
-                {
-                    animator.SetBool("FreeFall", false);
-                }
+                airtime = 0f;
+                animator.SetBool("FreeFall", false);
+            }
+            if (airtime > 0.5f)
+            {
+                animator.SetBool("FreeFall", true);
             }
         }
 
         public void Jump()
         {
-            waitForJump = true;
-            animator.SetBool("Jump", true);
+            animator.SetTrigger("Jump");
+            JumpServerRpc();
+        }
+
+        [ServerRpc]
+        private void JumpServerRpc()
+        {
+            JumpClientRpc();
+        }
+
+        [ClientRpc]
+        private void JumpClientRpc()
+        {
+            if (!IsLocalPlayer)
+            {
+                animator.SetTrigger("Jump");
+            }
         }
 
         public void SetCrouching(bool isCrouching)
         {
-            Vector3 horizontalVelocity = characterController.velocity;
-            horizontalVelocity.y = 0;
+            Vector3 horizontalVelocity = controllerScript.horizontalVelocity;
 
             animator.SetFloat("Speed", horizontalVelocity.magnitude / controllerScript.maxSpeed);
             animator.SetBool("Crouching", isCrouching);
+        }
+
+        public void SetCanSuperJump(bool canSuperJump)
+        {
+            animator.SetBool("CanSuperJump", canSuperJump);
         }
     }
 }

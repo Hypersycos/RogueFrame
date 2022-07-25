@@ -41,6 +41,7 @@ namespace Hypersycos.RogueFrame.Game
         private void SpawnPlayer(ulong clientId)
         {
             NetworkObject player = Instantiate(playerPrefab, new Vector3(0, 5, 0), Quaternion.identity);
+            player.name = clientId.ToString();
             player.SpawnAsPlayerObject(clientId, true);
         }
     }

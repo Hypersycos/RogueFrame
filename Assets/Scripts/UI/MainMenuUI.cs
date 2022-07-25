@@ -11,6 +11,14 @@ namespace Hypersycos.RogueFrame
         [SerializeField] private TMP_InputField ipAddressInputField;
         [SerializeField] private Unity.Netcode.Transports.UTP.UnityTransport transport;
 
+        void Awake()
+        {
+#if UNITY_EDITOR
+            QualitySettings.vSyncCount = 0;  // VSync must be disabled
+            Application.targetFrameRate = 60;
+#endif
+        }
+
         private void Start()
         {
             displayNameInputField.text = PlayerPrefs.GetString("PlayerName");

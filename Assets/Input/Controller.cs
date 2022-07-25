@@ -17,7 +17,12 @@ namespace Hypersycos.RogueFrame.Input
         private CharacterController characterController;
 
         [SerializeField] private float gravityMultiplier = 1f;
-        private float gravityForce { get { return Physics.gravity.y * gravityMultiplier * (movementModifiers < 1 ? movementModifiers : 1); } }
+        private float gravityForce {
+            get
+            {
+                return Physics.gravity.y * gravityMultiplier
+                     * (movementModifiers < 1 ? movementModifiers : 1);
+            } }
 
         [SerializeField] private float movementSpeed = 4f;
         [SerializeField] private float airStrafeRate = 0.4f;
@@ -25,15 +30,16 @@ namespace Hypersycos.RogueFrame.Input
         [field: SerializeField] public float movementModifiers { get; private set; } = 1f;
         private Dictionary<string, float> movementModifierTracker = new Dictionary<string, float>();
         [SerializeField] private float smoothing = 0.1f;
-        public float maxSpeed { get { return movementSpeed * movementModifiers; } }
+        public float maxSpeed { get { return movementSpeed * movementModifiers * (crouching && IsGrounded() ? crouchSpeed : 1); } }
         private float moveForce { get { return maxSpeed / (smoothing / (movementModifiers < 1 ? movementModifiers : 1)) * (IsGrounded() ? 1 : airStrafeRate); } }
         [SerializeField] private float overspeedControl = 0.4f;
         [SerializeField] private float overspeedCarry = 0.25f;
         [SerializeField] private Vector3 velocity = Vector3.zero;
-        private Vector3 horizontalVelocity { get { return new Vector3(velocity.x, 0, velocity.z); } }
+        [SerializeField] public Vector3 intendedVelocity { get { return velocity; } }
+        public Vector3 horizontalVelocity { get { return new Vector3(velocity.x, 0, velocity.z); } }
 
         public bool crouching { get; private set; } = false;
-        [SerializeField] private float crouchSpeed = 0.4f;
+        [SerializeField] public float crouchSpeed { get; private set; } = 0.4f;
         [SerializeField] private float slideThreshold = 0.5f;
         [SerializeField] private float slideImpulse = 0.5f;
 
@@ -44,6 +50,7 @@ namespace Hypersycos.RogueFrame.Input
         private float superJumpForce { get { return Mathf.Sqrt(-2f * gravityForce * superJumpHeight * (movementModifiers > 1 ? movementModifiers : 1)); } }
         [SerializeField] private int maxJumps = 2;
         private int jumpsAvailable = 0;
+        private float lastJump = 0f;
 
         //other
         [SerializeField] Camera playerCamera;
@@ -53,16 +60,18 @@ namespace Hypersycos.RogueFrame.Input
         {
             if (!IsLocalPlayer)
             {
-                animatorScript.enabled = false;
-                enabled = false;
+                return;
             }
+            enabled = true;
+            animatorScript = GetComponent<PlayerAnimatorScript>();
             characterController = GetComponent<CharacterController>();
+            animatorScript.enabled = true;
+            characterController.enabled = true;
             ControlAsset = new Controls();
             playerCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
             Cinemachine.CinemachineVirtualCamera cinemachineCam = playerCamera.GetComponent<Cinemachine.CinemachineVirtualCamera>();
             cinemachineCam.Follow = transform.GetChild(0);
             cinemachineCam.LookAt = transform.GetChild(0);
-            animatorScript = GetComponent<PlayerAnimatorScript>();
 
             move = ControlAsset.Player.Move;
 
@@ -96,21 +105,17 @@ namespace Hypersycos.RogueFrame.Input
             }
             if (crouching)
             {
-                if (horizontalVelocity.magnitude / maxSpeed > slideThreshold)
+                float oldMaxSpeed = (maxSpeed / crouchSpeed);
+                if (horizontalVelocity.magnitude / oldMaxSpeed > slideThreshold && IsGrounded())
                 {
-                    if (horizontalVelocity.magnitude < maxSpeed * (1 + slideImpulse))
+                    if (horizontalVelocity.magnitude < oldMaxSpeed * (1 + slideImpulse))
                     {
-                        float magnitude = Mathf.Min(maxSpeed * slideImpulse, maxSpeed * (1 + slideImpulse) - horizontalVelocity.magnitude);
+                        float magnitude = Mathf.Min(oldMaxSpeed * slideImpulse, oldMaxSpeed * (1 + slideImpulse) - horizontalVelocity.magnitude);
                         Vector3 impulse = horizontalVelocity.normalized * magnitude;
                         velocity.x += impulse.x;
                         velocity.z += impulse.z;
                     }
                 }
-                AddMovementModifier(crouchSpeed, "crouching");
-            }
-            else
-            {
-                RemoveMovementModifier("crouching");
             }
             animatorScript.SetCrouching(crouching);
         }
@@ -127,9 +132,7 @@ namespace Hypersycos.RogueFrame.Input
         {
             if (move == null)
             {
-                move = ControlAsset.Player.Move;
-                if (move == null)
-                    return;
+                return;
             }
             Vector3 inputForce = Vector3.zero;
             inputForce += move.ReadValue<Vector2>().x * GetCameraRight(playerCamera) * moveForce * Time.fixedDeltaTime;
@@ -154,7 +157,13 @@ namespace Hypersycos.RogueFrame.Input
                     float otherMagnitude = Vector3.Dot(complement, inputForce);
                     inputForce = -dragForce * overspeedCarry + complement * otherMagnitude;
                 }
-                velocity += inputForce + dragForce;
+                float heightChange = characterController.velocity.y / horizontalVelocity.sqrMagnitude * 4;
+                if (horizontalVelocity.magnitude - 0.0001f < maxSpeed || !IsGrounded() || lastJump > 0f)
+                {
+                    heightChange = 0;
+                }
+                Vector3 heightChangeAcceleration = dragForce.normalized * heightChange;
+                velocity += inputForce + dragForce + heightChangeAcceleration;
             }
             else
             {
@@ -182,16 +191,33 @@ namespace Hypersycos.RogueFrame.Input
                     velocity.z = temp.z;
                 }
             }
+
             characterController.Move(velocity * Time.fixedDeltaTime);
+            if (!IsGrounded() && velocity.y == 0f)
+            {
+                { //check if stairs
+                    Ray ray = new Ray(this.transform.position + Vector3.up * 0.25f, Vector3.down);
+                    if (Physics.Raycast(ray, out RaycastHit hit, 0.3f + characterController.stepOffset))
+                    {
+                        velocity.y -= 1f;
+                    }
+                }
+            }
             if (IsGrounded() && velocity.y <= 0f)
             {
-                velocity.y = 0;
+                velocity.y *= 0.7f;
+                if (velocity.y > -0.1f)
+                    velocity.y = 0f;
                 jumpsAvailable = maxJumps;
                 superJumpAvailable = true;
             }
             else
             {
                 velocity.y += gravityForce * Time.fixedDeltaTime;
+            }
+            if (lastJump > 0f)
+            {
+                lastJump -= Time.fixedDeltaTime;
             }
         }
 
@@ -213,43 +239,50 @@ namespace Hypersycos.RogueFrame.Input
         {
             if (jumpsAvailable > 0)
             {
+                animatorScript.SetCanSuperJump(superJumpAvailable);
                 if (superJumpAvailable && crouching)
                 {
                     Vector3 direction = playerCamera.transform.forward;
-                    if (direction.y < 0 && IsGrounded())
+                    //check if something within jump height close below
+                    Ray ray = new Ray(this.transform.position + Vector3.up * 0.25f, Vector3.down);
+                    bool withinJumpHeight = Physics.Raycast(ray, out RaycastHit hit, 0.3f + jumpHeight);
+                    if (direction.y < 0 && (withinJumpHeight || IsGrounded()))
                     {
                         direction.y = -direction.y;
                     }
                     float horizontalMagnitude = Mathf.Min(horizontalVelocity.magnitude, maxSpeed/crouchSpeed * (1+slideImpulse));
                     float jumpMagnitude = Mathf.Max(superJumpForce, horizontalMagnitude);
+                    //superjump completely overrides currently velocity. Maybe should have some sort of scaling?
                     velocity = direction * jumpMagnitude;
                     superJumpAvailable = false;
                 }
                 else
                 {
                     velocity.y = jumpForce;
-                    animatorScript.Jump();
                     Vector3 inputForce = Vector3.zero;
                     inputForce += move.ReadValue<Vector2>().x * GetCameraRight(playerCamera);
                     inputForce += move.ReadValue<Vector2>().y * GetCameraForward(playerCamera);
                     inputForce = inputForce.normalized;
+                    //allow a normal jump to cancel up to half momentum away from travel direction
+                    //but keep all speed if jumping in direction of travel
                     float component = (Vector3.Dot(horizontalVelocity.normalized, inputForce) + 3) / 4;
                     float magnitude = horizontalVelocity.magnitude;
                     velocity.x = inputForce.x * component * magnitude;
                     velocity.z = inputForce.z * component * magnitude;
                 }
                 jumpsAvailable -= 1;
+                animatorScript.Jump();
+                lastJump = 0.5f;
             }
         }
 
         public bool IsGrounded()
         {
-            //return characterController.isGrounded; //?
             Ray ray = new Ray(this.transform.position + Vector3.up * 0.25f, Vector3.down);
             if (Physics.Raycast(ray, out RaycastHit hit, 0.3f))
                 return true;
             else
-                return false;
+                return false || characterController.isGrounded;
         }
 
         public void AddMovementModifier(float modifier, string name)
