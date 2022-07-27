@@ -1,9 +1,8 @@
-using Hypersycos.RogueFrame.Networking;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Hypersycos.RogueFrame.UI
+namespace Hypersycos.RogueFrame
 {
     public class LobbyUI : NetworkBehaviour
     {

@@ -622,6 +622,7 @@ GameObject:
   - component: {fileID: 5392898739974426384}
   - component: {fileID: 1001270911722393468}
   - component: {fileID: 1026766207812975276}
+  - component: {fileID: 1414605925911609053}
   m_Layer: 3
   m_Name: PlayerArmature
   m_TagString: Player
@@ -749,7 +750,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2759961671293997762}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4494bd37e2acc7140a84d107d560f16a, type: 3}
+  m_Script: {fileID: 11500000, guid: 8347f118d66144f4d8fa408af8ec8f01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   gravityMultiplier: 1
@@ -761,8 +762,8 @@ MonoBehaviour:
   overspeedControl: 0.4
   overspeedCarry: 0.25
   velocity: {x: 0, y: 0, z: 0}
-  slideThreshold: 0.1
-  slideImpulse: 0.3
+  slideThreshold: 0.5
+  slideImpulse: 0.5
   jumpHeight: 1
   superJumpHeight: 4
   maxJumps: 2
@@ -780,6 +781,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runSpeedNormal: 5
+--- !u!114 &1414605925911609053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2759961671293997762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37bf71528477b0a4fb37db83418572b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2828659657738881041
 GameObject:
   m_ObjectHideFlags: 0

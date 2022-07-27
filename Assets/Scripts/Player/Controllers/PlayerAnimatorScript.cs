@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-namespace Hypersycos.RogueFrame.Input
+namespace Hypersycos.RogueFrame
 {
     public class PlayerAnimatorScript : NetworkBehaviour
     {
         private Animator animator;
-        private Controller controllerScript;
+        private PlayerMovementController controllerScript;
         private CharacterController characterController;
         [SerializeField] float runSpeedNormal = 5f;
         private float airtime = 2f;
@@ -24,7 +24,7 @@ namespace Hypersycos.RogueFrame.Input
             {
                 return;
             }
-            controllerScript = GetComponent<Controller>();
+            controllerScript = GetComponent<PlayerMovementController>();
             characterController = GetComponent<CharacterController>();
         }
 

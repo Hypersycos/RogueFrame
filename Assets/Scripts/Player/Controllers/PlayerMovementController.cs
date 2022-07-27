@@ -5,12 +5,12 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
 
-namespace Hypersycos.RogueFrame.Input
+namespace Hypersycos.RogueFrame
 {
-    public class Controller : NetworkBehaviour
+    public class PlayerMovementController : NetworkBehaviour
     {
         //input fields
-        private Controls ControlAsset;
+        public Controls ControlAsset { get; private set; }
         private InputAction move;
 
         //movement fields
@@ -122,10 +122,13 @@ namespace Hypersycos.RogueFrame.Input
 
         public override void OnNetworkDespawn()
         {
-            ControlAsset.Player.Jump.started -= DoJump;
-            ControlAsset.Player.Crouch.started -= DoCrouch;
-            ControlAsset.Player.Crouch.canceled -= DoCrouch;
-            ControlAsset.Player.ToggleCrouch.started -= DoCrouch;
+            if (IsLocalPlayer)
+            {
+                ControlAsset.Player.Jump.started -= DoJump;
+                ControlAsset.Player.Crouch.started -= DoCrouch;
+                ControlAsset.Player.Crouch.canceled -= DoCrouch;
+                ControlAsset.Player.ToggleCrouch.started -= DoCrouch;
+            }
         }
 
         private void FixedUpdate()

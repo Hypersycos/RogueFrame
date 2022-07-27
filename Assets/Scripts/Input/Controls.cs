@@ -225,6 +225,24 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Change Ability"",
+                    ""type"": ""Button"",
+                    ""id"": ""8186c482-3ccf-4fd3-b7f2-558978e0e42e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Use Ability"",
+                    ""type"": ""Button"",
+                    ""id"": ""f860b727-c2e8-45d2-acd0-ecdc0da11661"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -579,6 +597,28 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""action"": ""Toggle Crouch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f251340c-9a7d-420f-aa97-c9c6cf555509"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Change Ability"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4f36fd15-5029-432b-89b2-da8c60d35fa2"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Use Ability"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -637,6 +677,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_ChangeWeapon = m_Player.FindAction("Change Weapon", throwIfNotFound: true);
         m_Player_ToggleCrouch = m_Player.FindAction("Toggle Crouch", throwIfNotFound: true);
+        m_Player_ChangeAbility = m_Player.FindAction("Change Ability", throwIfNotFound: true);
+        m_Player_UseAbility = m_Player.FindAction("Use Ability", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -748,6 +790,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_ChangeWeapon;
     private readonly InputAction m_Player_ToggleCrouch;
+    private readonly InputAction m_Player_ChangeAbility;
+    private readonly InputAction m_Player_UseAbility;
     public struct PlayerActions
     {
         private @Controls m_Wrapper;
@@ -771,6 +815,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         public InputAction @ChangeWeapon => m_Wrapper.m_Player_ChangeWeapon;
         public InputAction @ToggleCrouch => m_Wrapper.m_Player_ToggleCrouch;
+        public InputAction @ChangeAbility => m_Wrapper.m_Player_ChangeAbility;
+        public InputAction @UseAbility => m_Wrapper.m_Player_UseAbility;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -837,6 +883,12 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @ToggleCrouch.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnToggleCrouch;
                 @ToggleCrouch.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnToggleCrouch;
                 @ToggleCrouch.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnToggleCrouch;
+                @ChangeAbility.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnChangeAbility;
+                @ChangeAbility.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnChangeAbility;
+                @ChangeAbility.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnChangeAbility;
+                @UseAbility.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUseAbility;
+                @UseAbility.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUseAbility;
+                @UseAbility.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUseAbility;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -898,6 +950,12 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @ToggleCrouch.started += instance.OnToggleCrouch;
                 @ToggleCrouch.performed += instance.OnToggleCrouch;
                 @ToggleCrouch.canceled += instance.OnToggleCrouch;
+                @ChangeAbility.started += instance.OnChangeAbility;
+                @ChangeAbility.performed += instance.OnChangeAbility;
+                @ChangeAbility.canceled += instance.OnChangeAbility;
+                @UseAbility.started += instance.OnUseAbility;
+                @UseAbility.performed += instance.OnUseAbility;
+                @UseAbility.canceled += instance.OnUseAbility;
             }
         }
     }
@@ -945,5 +1003,7 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         void OnInteract(InputAction.CallbackContext context);
         void OnChangeWeapon(InputAction.CallbackContext context);
         void OnToggleCrouch(InputAction.CallbackContext context);
+        void OnChangeAbility(InputAction.CallbackContext context);
+        void OnUseAbility(InputAction.CallbackContext context);
     }
 }

@@ -1,4 +1,4 @@
-namespace Hypersycos.RogueFrame.Networking
+namespace Hypersycos.RogueFrame
 {
     public enum ConnectStatus
     {

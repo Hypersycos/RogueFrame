@@ -2,7 +2,7 @@ using System;
 using Unity.Collections;
 using Unity.Netcode;
 
-namespace Hypersycos.RogueFrame.UI
+namespace Hypersycos.RogueFrame
 {
     public struct LobbyPlayerState : INetworkSerializable, IEquatable<LobbyPlayerState>
     {

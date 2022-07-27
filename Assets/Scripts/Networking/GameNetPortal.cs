@@ -4,7 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Hypersycos.RogueFrame.Networking
+namespace Hypersycos.RogueFrame
 {
     public class GameNetPortal : MonoBehaviour
     {

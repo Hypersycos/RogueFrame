@@ -1,6 +1,6 @@
 using System;
 
-namespace Hypersycos.RogueFrame.Networking
+namespace Hypersycos.RogueFrame
 {
     [Serializable]
     public class ConnectionPayload

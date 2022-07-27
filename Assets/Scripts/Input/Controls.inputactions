@@ -203,6 +203,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Change Ability",
+                    "type": "Button",
+                    "id": "8186c482-3ccf-4fd3-b7f2-558978e0e42e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Use Ability",
+                    "type": "Button",
+                    "id": "f860b727-c2e8-45d2-acd0-ecdc0da11661",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -555,6 +573,28 @@
                     "processors": "",
                     "groups": "Keyboard",
                     "action": "Toggle Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f251340c-9a7d-420f-aa97-c9c6cf555509",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Change Ability",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4f36fd15-5029-432b-89b2-da8c60d35fa2",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Use Ability",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Hypersycos.RogueFrame.UI
+namespace Hypersycos.RogueFrame
 {
     public class LobbyPlayerCard : MonoBehaviour
     {
