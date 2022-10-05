@@ -623,6 +623,7 @@ GameObject:
   - component: {fileID: 1001270911722393468}
   - component: {fileID: 1026766207812975276}
   - component: {fileID: 1414605925911609053}
+  - component: {fileID: 5672643345526841621}
   m_Layer: 3
   m_Name: PlayerArmature
   m_TagString: Player
@@ -763,7 +764,7 @@ MonoBehaviour:
   overspeedCarry: 0.25
   velocity: {x: 0, y: 0, z: 0}
   slideThreshold: 0.5
-  slideImpulse: 0.5
+  slideImpulse: 0
   jumpHeight: 1
   superJumpHeight: 4
   maxJumps: 2
@@ -793,6 +794,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37bf71528477b0a4fb37db83418572b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  camera: {fileID: 0}
+  cameraRoot: {fileID: 0}
+  playerState: {fileID: 5672643345526841621}
+  cameraOffset: {x: 0.7, y: 0, z: -1}
+--- !u!114 &5672643345526841621
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2759961671293997762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc271879e4b65c945b177d4d202cf89f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Energy:
+    <Value>k__BackingField: 0
+    <MinValue>k__BackingField: 0
+    <MaxValue>k__BackingField: 0
+  Health:
+    <Value>k__BackingField: 100
+    <MinValue>k__BackingField: 0
+    <MaxValue>k__BackingField: 100
+  Shields:
+    <Value>k__BackingField: 50
+    <MinValue>k__BackingField: 0
+    <MaxValue>k__BackingField: 50
+  OverHealth:
+    <Value>k__BackingField: 400
+    <MinValue>k__BackingField: 0
+    <MaxValue>k__BackingField: 400
 --- !u!1 &2828659657738881041
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,8 +13,8 @@ namespace Hypersycos.RogueFrame
             Instance
         }
 
-        public static string Name { get; protected set; }
-        public static string Description { get; protected set; }
-        public static StackMethod StackType { get; protected set; }
+        [field: SerializeField] public string Name { get; private set; }
+        [field: SerializeField] public string Description { get; private set; }
+        [field: SerializeField] public StackMethod StackType { get; private set; }
     }
 }

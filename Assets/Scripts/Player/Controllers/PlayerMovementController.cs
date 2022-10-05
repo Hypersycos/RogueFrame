@@ -41,7 +41,7 @@ namespace Hypersycos.RogueFrame
         public bool crouching { get; private set; } = false;
         [SerializeField] public float crouchSpeed { get; private set; } = 0.4f;
         [SerializeField] private float slideThreshold = 0.5f;
-        [SerializeField] private float slideImpulse = 0.5f;
+        [SerializeField] private float slideImpulse = 0f;
 
         [SerializeField] private float jumpHeight = 1f;
         private float jumpForce { get { return Mathf.Sqrt(-2f * gravityForce * jumpHeight); } }

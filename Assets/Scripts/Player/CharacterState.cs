@@ -1,15 +1,27 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Events;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Hypersycos.RogueFrame
 {
-    public abstract class CharacterState
+    public abstract class CharacterState : MonoBehaviour
     {
+        void Start()
+        {
+            DefenseStatInstance Health = new DefenseStatInstance(100);
+            HitPoints = new DefensePool(new List<DefenseStatInstance>() { Health});
+        }
+
+        protected virtual void FixedUpdate()
+        {
+            HitPoints.Tick(Time.fixedDeltaTime);
+        }
         public class CharacterStateEvent : UnityEvent<CharacterState, DamageInstance> { }
 
-        public float Health;
-        public int MaxHealth;
         readonly Dictionary<StatusEffect, List<IStatusInstance>> statusInstances = new();
+
+        [SerializeField] protected DefensePool HitPoints;
 
         //OnDamaged should not be invoked when the character is killed
         public CharacterStateEvent OnDamaged = new();
@@ -28,49 +40,27 @@ namespace Hypersycos.RogueFrame
 
         public abstract void AddStatus(StatusEffect effect, IStatusInstance instance);
 
-        protected virtual KeyValuePair<float, bool> ApplyDamage(float damage)
-        {
-            Health -= damage;
-            if (Health <= 0)
-            {
-                return new KeyValuePair<float, bool>(damage - Health, true);
-            }
-            else
-            {
-                return new KeyValuePair<float, bool>(damage, false);
-            }
-        }
         public void ApplyDamageInstance(DamageInstance damageInstance)
         {
             if (!damageInstance.isDamage) return;
             damageInstance.BeforeApply.Invoke(this, damageInstance);
             BeforeDamaged.Invoke(this, damageInstance);
 
-            KeyValuePair<float, bool> result = ApplyDamage(damageInstance.actualAmount);
-            damageInstance.actualAmount = result.Key;
+            float damage = HitPoints.RemoveValue(damageInstance.actualAmount);
+            damageInstance.actualAmount = damage;
 
-            if (result.Value)
+            if (damage > 0)
             {
-                OnKilled.Invoke(this, damageInstance);
-                damageInstance.OnFullApply.Invoke(this, damageInstance);
-            }
-            else
-            {
-                OnDamaged.Invoke(this, damageInstance);
-                damageInstance.OnApply.Invoke(this, damageInstance);
-            }
-        }
-
-        protected virtual KeyValuePair<float, bool> ApplyHeal(float heal)
-        {
-            Health += heal;
-            if (Health > MaxHealth)
-            {
-                return new KeyValuePair<float, bool>(heal - Health + MaxHealth, true);
-            }
-            else
-            {
-                return new KeyValuePair<float, bool>(heal, false);
+                if (!HitPoints.IsActive)
+                {
+                    OnKilled.Invoke(this, damageInstance);
+                    damageInstance.OnFullApply.Invoke(this, damageInstance);
+                }
+                else
+                {
+                    OnDamaged.Invoke(this, damageInstance);
+                    damageInstance.OnApply.Invoke(this, damageInstance);
+                }
             }
         }
 
@@ -80,18 +70,21 @@ namespace Hypersycos.RogueFrame
             healInstance.BeforeApply.Invoke(this, healInstance);
             BeforeHealed.Invoke(this, healInstance);
 
-            KeyValuePair<float, bool> result = ApplyHeal(healInstance.amount);
-            healInstance.actualAmount = result.Key;
+            float heal = HitPoints.AddValue(healInstance.actualAmount);
+            healInstance.actualAmount = heal;
 
-            if (result.Value)
+            if (heal > 0)
             {
-                OnFullyHealed.Invoke(this, healInstance);
-                healInstance.OnFullApply.Invoke(this, healInstance);
-            }
-            else
-            {
-                OnHealed.Invoke(this, healInstance);
-                healInstance.OnApply.Invoke(this, healInstance);
+                if (HitPoints.Value == HitPoints.MaxValue)
+                {
+                    OnFullyHealed.Invoke(this, healInstance);
+                    healInstance.OnFullApply.Invoke(this, healInstance);
+                }
+                else
+                {
+                    OnHealed.Invoke(this, healInstance);
+                    healInstance.OnApply.Invoke(this, healInstance);
+                }
             }
         }
     }
