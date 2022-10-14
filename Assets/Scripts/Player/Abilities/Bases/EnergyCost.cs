@@ -4,9 +4,10 @@ using UnityEngine;
 
 namespace Hypersycos.RogueFrame
 {
+    [System.Serializable]
     public class EnergyCost : IAbilityRequirement
     {
-        public int Energy { get; }
+        [field: SerializeField] public int Energy { get; private set; }
         bool IAbilityRequirement.CanCast(PlayerState state)
         {
             return state.CanUseEnergy(Energy);
@@ -22,6 +23,7 @@ namespace Hypersycos.RogueFrame
             state.GiveEnergy(Energy);
         }
 
+        public EnergyCost() : this(0) { }
         public EnergyCost(int energy)
         {
             Energy = energy;

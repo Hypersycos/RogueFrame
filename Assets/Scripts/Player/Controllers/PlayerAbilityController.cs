@@ -19,7 +19,7 @@ namespace Hypersycos.RogueFrame
         private Quaternion? lastCastRotation = null;
         private double clientCastLockout = 0;
         private double serverCastLockout = 0;
-        [SerializeField] private List<Ability> abilities = new List<Ability>() { new TestProjectileAbility()};
+        [SerializeField] private List<AbilitySO> abilities = new();
         [SerializeField] private PlayerState playerState;
         private float castSpeed = 1; //TODO: replace with generic stat
         [SerializeField] private Vector3 cameraOffset = new Vector3(0.7f, 0, -1);
@@ -60,7 +60,7 @@ namespace Hypersycos.RogueFrame
             {
                 clientCastLockout = -1;
                 CastServerRpc(currentAbility, camera.rotation);
-                Ability selected = abilities[currentAbility];
+                AbilitySO selected = abilities[currentAbility];
                 lastCastAbility = currentAbility;
                 if (selected.CastTime > 0)
                 {
@@ -101,7 +101,7 @@ namespace Hypersycos.RogueFrame
                 CastResultClientRpc(serverCastLockout, -1);
                 return;
             }
-            Ability ability = abilities[abilityIndex];
+            AbilitySO ability = abilities[abilityIndex];
             if (ability.CastCost(playerState))
             {
                 Vector3 cameraPosition = cameraRoot.position + lookDirection * cameraOffset;
@@ -143,10 +143,10 @@ namespace Hypersycos.RogueFrame
                 timeout -= Time.fixedDeltaTime;
                 yield return new WaitForFixedUpdate();
             }
-            Ability delayedAbility = abilities[lastCastAbility];
+            AbilitySO delayedAbility = abilities[lastCastAbility];
             Quaternion lookDirection = lastCastRotation ?? oldLookDirection;
             Vector3 cameraPosition = cameraRoot.position + lookDirection * cameraOffset;
-            delayedAbility.DelayedCastEffect(cameraPosition, lookDirection);
+            delayedAbility.DelayedCastEffect(cameraPosition, lookDirection, playerState);
         }
 
         private void NextAbility(InputAction.CallbackContext obj)

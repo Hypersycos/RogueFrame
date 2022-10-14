@@ -25,7 +25,7 @@ namespace Hypersycos.RogueFrame
             throw new System.NotImplementedException();
         }
 
-        public override void DelayedCastEffect(Vector3 cameraPosition, Quaternion lookDirection)
+        public override void DelayedCastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster)
         {
             throw new System.NotImplementedException();
         }

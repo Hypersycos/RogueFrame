@@ -35,7 +35,7 @@ namespace Hypersycos.RogueFrame
             return true;
         }
         public abstract void CastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster);
-        public abstract void DelayedCastEffect(Vector3 cameraPosition, Quaternion lookDirection);
+        public abstract void DelayedCastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster);
         public abstract void DrawIcon(Canvas container);
     }
 }

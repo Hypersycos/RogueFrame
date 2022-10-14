@@ -184,3 +184,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7424f41009ff91240813252a7a853cb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damageInstance:
+    isDamage: 1
+    amount: 30
+  LaunchVelocity: {x: 0, y: 0, z: 10}
