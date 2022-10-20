@@ -1,14 +1,47 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Hypersycos.RogueFrame
 {
-    public class DefensePool : DefenseStatInstance
+    public class DefensePool
     {
-        List<DefenseStatInstance> DefenseInstances;
+        [Serializable]
+        public class StatTypeTarget
+        {
+            public bool IsExclusive = true;
+            public List<StatType> Types = new();
 
-        public override bool IsActive
+            public StatTypeTarget (bool isExclusive = true, List<StatType> types = null)
+            {
+                IsExclusive = isExclusive;
+                Types = types;
+            }
+
+            public StatTypeTarget()
+            {
+
+            }
+
+            public bool IsValid(StatType type)
+            {
+                if (Types == null) return true;
+                return Types.Contains(type) ^ IsExclusive;
+            }
+
+            public static StatTypeTarget AllValid => new StatTypeTarget(false, null);
+        }
+
+        [SerializeField] List<DefenseStatInstance> DefenseInstances = new();
+        [SerializeField, ReadOnly] protected readonly Dictionary<BoundedStatModifier, StatTypeTarget> BoundedModifiers = new();
+        [SerializeField, ReadOnly] protected readonly Dictionary<StatGainModifier, StatTypeTarget> PositiveGainModifiers = new ();
+        [SerializeField, ReadOnly] protected readonly Dictionary<StatGainModifier, StatTypeTarget> NegativeGainModifiers = new ();
+        [SerializeField, ReadOnly] protected readonly Dictionary<StatRegenerationModifier, StatTypeTarget> StatRegenerationModifiers = new();
+        CharacterState Owner;
+
+        public bool IsActive
         {
             get
             {
@@ -19,110 +52,244 @@ namespace Hypersycos.RogueFrame
                 return false;
             }
         }
-        public DefensePool(List<DefenseStatInstance> defenseInstances) : base(1, null)
+        public float MaxValue
         {
-            OnIncrease.AddListener((_, change) => Value += change);
-            OnDecrease.AddListener((_, change) => Value += change);
-            OnMaxIncrease.AddListener((_, change) => MaxValue += change);
-            OnMaxDecrease.AddListener((_, change) => MaxValue += change);
-            OnEmpty.AddListener((_, _, _) => Value = 0);
-            OnFill.AddListener((_, _, _) => Value = MaxValue);
-
-            DefenseInstances = defenseInstances;
-            for(int i = 1; i < DefenseInstances.Count; i++)
+            get
             {
-                defenseInstances[i].Below = defenseInstances[i - 1];
-                defenseInstances[i - 1].Above = defenseInstances[i];
+                float sum = 0;
+                foreach (DefenseStatInstance inst in DefenseInstances)
+                {
+                    if (!inst.IsOverhealth)
+                    {
+                        sum += inst.MaxValue;
+                    }
+                }
+                return sum;
             }
-            defenseInstances[0].OnEmpty.AddListener((_, arg1, arg2) => OnEmpty?.Invoke(this, arg1, arg2));
-            defenseInstances[DefenseInstances.Count-1].OnFill.AddListener((_, arg1, arg2) => OnEmpty?.Invoke(this, arg1, arg2));
-
-            float Max = 0;
-
-            foreach(DefenseStatInstance defenseStatInstance in DefenseInstances)
-            {
-                defenseStatInstance.OnMaxDecrease.AddListener((_, change) => OnMaxDecrease?.Invoke(this, change));
-                defenseStatInstance.OnMaxIncrease.AddListener((_, change) => OnMaxIncrease?.Invoke(this, change));
-                Max += defenseStatInstance.MaxValue;
-            }
-            MaxValue = Max;
-            Value = Max;
         }
 
-        public override void Tick(float deltaTime)
+        public float Value
+        {
+            get
+            {
+                float sum = 0;
+                foreach (DefenseStatInstance inst in DefenseInstances)
+                {
+                    if (!inst.IsOverhealth)
+                    {
+                        sum += inst.Value;
+                    }
+                }
+                return sum;
+            }
+        }
+        public float TotalValue
+        {
+            get
+            {
+                float sum = 0;
+                foreach (DefenseStatInstance inst in DefenseInstances)
+                {
+                    sum += inst.Value;
+                }
+                return sum;
+            }
+        }
+
+        public DefensePool(List<DefenseStatInstance> defenseInstances, CharacterState owner)
+        {
+            DefenseInstances = defenseInstances;
+            Owner = owner;
+        }
+
+        public DefensePool(CharacterState owner)
+        {
+            Owner = owner;
+        }
+
+        public Color GetDamageColor()
+        {
+            int index = DefenseInstances.Count - 1;
+            while (index > 0)
+            {
+                DefenseStatInstance inst = DefenseInstances[index--];
+                if (inst.IsActive) break;
+            }
+            return DefenseInstances[index].StatType.Color;
+        }
+
+        public void Tick(float deltaTime)
         {
             if (!IsActive) return;
-            foreach(DefenseStatInstance defenseInstance in DefenseInstances)
+            foreach (DefenseStatInstance defenseInstance in DefenseInstances)
             {
                 defenseInstance.Tick(deltaTime);
             }
-            base.Tick(deltaTime);
+            foreach(KeyValuePair<StatRegenerationModifier,StatTypeTarget> pair in StatRegenerationModifiers)
+            {
+                if (!IsActive) return;
+                StatRegenerationModifier regenerator = pair.Key;
+                StatTypeTarget validTargets = pair.Value;
+                float change = regenerator.Tick(deltaTime, MaxValue, Value);
+                if (change > 0)
+                {
+                    Owner.ApplyHealInstance(new DamageInstance(false, change, regenerator.CharacterSource, validTargets), false);
+                }
+                else
+                {
+                    Owner.ApplyDamageInstance(new DamageInstance(true, -change, regenerator.CharacterSource, validTargets), false);
+                }
+            }
         }
 
-        public override float ApplyChange(float Amount)
+        public void Damage(DamageInstance instance)
         {
-            if (Amount == 0) return 0;
-
-            int index = 0;
-            int end = DefenseInstances.Count - 1;
-            int direction = 1;
-            if (Amount < 0)
+            int index = DefenseInstances.Count - 1;
+            float amount = instance.ActualAmount;
+            float dealt = 0;
+            while (index >= 0 && amount > 0)
             {
-                index = end;
-                end = 0;
-                direction = -1;
-            }
-
-            while (index - direction != end)
-            {
-                DefenseStatInstance inst = DefenseInstances[index];
-                if (inst.IsActive)
+                DefenseStatInstance inst = DefenseInstances[index--];
+                if (instance.ValidStatTypes.IsValid(inst.StatType))
                 {
-                    if (Amount > 0)
+                    if (inst.IsActive)
                     {
-                        float change = inst.AddValue(Amount);
-                        if (Value < MaxValue) OnIncrease?.Invoke(this, change);
-                        return change;
+
+                        dealt += inst.Value;
+                        float overflow = inst.RemoveValue(amount);
+                        dealt -= inst.Value;
+                        amount = overflow;
                     }
                     else
                     {
-                        float change = inst.RemoveValue(-Amount);
-                        if (Value < MaxValue) OnDecrease?.Invoke(this, change);
-                        return change;
+                        inst.InterruptHOTs();
                     }
                 }
-                index += direction;
             }
-            //has no active health
-            return 0;
+            instance.ActualAmount = dealt;
         }
 
-        public override void AddModifier(BoundedStatModifier modifier)
+        public void Heal(DamageInstance instance)
         {
-            foreach(DefenseStatInstance inst in DefenseInstances)
+            int index = 0;
+            float amount = instance.ActualAmount;
+            float dealt = 0;
+            while (index < DefenseInstances.Count && amount > 0)
             {
-                inst.AddModifier(modifier);
+                DefenseStatInstance inst = DefenseInstances[index++];
+                if (instance.ValidStatTypes.IsValid(inst.StatType))
+                {
+                    if (inst.Value < inst.MaxValue)
+                    {
+                        dealt -= inst.Value;
+                        float overflow = inst.AddValue(amount);
+                        dealt += inst.Value;
+                        amount = overflow;
+                    }
+                    else
+                    {
+                        inst.InterruptDOTs();
+                    }
+                }
             }
-            base.AddModifier(modifier);
+            instance.ActualAmount = dealt;
         }
 
-        public override void RemoveModifier(BoundedStatModifier modifier)
+        public void AddModifier(StatModifier modifier, StatTypeTarget validTargets)
         {
-            foreach(DefenseStatInstance inst in DefenseInstances)
+            switch (modifier)
             {
-                inst.RemoveModifier(modifier);
+                case BoundedStatModifier bModifier:
+                    foreach (DefenseStatInstance inst in DefenseInstances)
+                    {
+                        if (validTargets.IsValid(inst.StatType))
+                        {
+                            inst.AddModifier(modifier);
+                        }
+                    }
+                    BoundedModifiers.Add(bModifier, validTargets);
+                    break;
+                case StatRegenerationModifier rModifier:
+                    StatRegenerationModifiers.Add(rModifier, validTargets);
+                    break;
+                case StatGainModifier sModifier:
+                    foreach (DefenseStatInstance inst in DefenseInstances)
+                    {
+                        if (validTargets.IsValid(inst.StatType))
+                        {
+                            inst.AddModifier(modifier);
+                        }
+                    }
+                    switch (sModifier.GainDirection)
+                    {
+                        case StatGainModifier.Direction.Negative:
+                            NegativeGainModifiers.Add(sModifier, validTargets);
+                            break;
+                        case StatGainModifier.Direction.Positive:
+                            PositiveGainModifiers.Add(sModifier, validTargets);
+                            break;
+                        case StatGainModifier.Direction.Both:
+                            PositiveGainModifiers.Add(sModifier, validTargets);
+                            NegativeGainModifiers.Add(sModifier, validTargets);
+                            break;
+                    }
+                    break;
+                default:
+                    throw new System.Exception("Attempt to add invalid modifier to bounded stat");
             }
-            base.RemoveModifier(modifier);
         }
 
-        protected override void Recalculate(BoundedStatModifier.ChangeBehaviour changeBehaviour)
+        public void RemoveModifier(StatModifier modifier)
         {
-            return;
-        }
-
-        protected override void ApplyChangeBehaviour(BoundedStatModifier.ChangeBehaviour changeBehaviour, float NewMax)
-        {
-            throw new System.Exception("Method should never be called");
+            switch (modifier)
+            {
+                case BoundedStatModifier bModifier:
+                    {
+                        StatTypeTarget validTargets = BoundedModifiers[bModifier];
+                        foreach (DefenseStatInstance inst in DefenseInstances)
+                        {
+                            if (validTargets.IsValid(inst.StatType))
+                            {
+                                inst.RemoveModifier(modifier);
+                            }
+                        }
+                        BoundedModifiers.Remove(bModifier);
+                    }
+                    break;
+                case StatRegenerationModifier rModifier:
+                    StatRegenerationModifiers.Remove(rModifier);
+                    break;
+                case StatGainModifier sModifier:
+                    {
+                        StatTypeTarget validTargets = StatTypeTarget.AllValid;
+                        switch (sModifier.GainDirection)
+                        {
+                            case StatGainModifier.Direction.Negative:
+                                validTargets = NegativeGainModifiers[sModifier];
+                                NegativeGainModifiers.Remove(sModifier);
+                                break;
+                            case StatGainModifier.Direction.Positive:
+                                validTargets = PositiveGainModifiers[sModifier];
+                                PositiveGainModifiers.Remove(sModifier);
+                                break;
+                            case StatGainModifier.Direction.Both:
+                                validTargets = NegativeGainModifiers[sModifier];
+                                PositiveGainModifiers.Remove(sModifier);
+                                NegativeGainModifiers.Remove(sModifier);
+                                break;
+                        }
+                        foreach (DefenseStatInstance inst in DefenseInstances)
+                        {
+                            if (validTargets.IsValid(inst.StatType))
+                            {
+                                inst.AddModifier(modifier);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    throw new System.Exception("Attempt to add invalid modifier to bounded stat");
+            }
         }
     }
 }

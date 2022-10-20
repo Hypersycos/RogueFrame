@@ -8,8 +8,13 @@ namespace Hypersycos.RogueFrame
     {
         void Start()
         {
-            Health.OnEmpty.AddListener((_,_,_) => StartCoroutine(FullHealAfter(3)));
-            HitPoints = new DefensePool(new List<DefenseStatInstance>() { Health });
+            Team = 1;
+            if (IsServer)
+            {
+                Health.OnEmpty.AddListener((_, _, _) => StartCoroutine(FullHealAfter(3)));
+                HitPoints = new DefensePool(new List<DefenseStatInstance>() { Health }, this);
+                GetComponentInChildren<StatBarScript>().AddStats(new List<BoundedStatInstance>() { Health });
+            }
         }
 
         IEnumerator FullHealAfter(float seconds)
@@ -19,10 +24,5 @@ namespace Hypersycos.RogueFrame
         }
 
         [SerializeField] DefenseStatInstance Health = new DefenseStatInstance(100);
-
-        public override void AddStatus(StatusEffect effect, IStatusInstance instance)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

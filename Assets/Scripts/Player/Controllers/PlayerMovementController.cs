@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
+using UnityEngine.InputSystem.XR;
 
 namespace Hypersycos.RogueFrame
 {
     public class PlayerMovementController : NetworkBehaviour
     {
+        public AudioClip LandingAudioClip;
+        public AudioClip[] FootstepAudioClips;
+        [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
         //input fields
         public Controls ControlAsset { get; private set; }
         private InputAction move;
@@ -142,7 +146,7 @@ namespace Hypersycos.RogueFrame
             inputForce += move.ReadValue<Vector2>().y * GetCameraForward(playerCamera) * moveForce * Time.fixedDeltaTime;
             float inputCap = move.ReadValue<Vector2>().magnitude * maxSpeed;
             inputForce *= IsGrounded() ? 1 : airStrafeRate;
-            if (inputForce.magnitude > float.Epsilon)
+            if (horizontalVelocity.magnitude > float.Epsilon)
             {
                 //transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(inputForce, Vector3.up), Time.fixedDeltaTime / smoothing);
                 transform.rotation = Quaternion.LookRotation(horizontalVelocity, Vector3.up);
@@ -304,6 +308,26 @@ namespace Hypersycos.RogueFrame
             {
                 movementModifiers /= movementModifierTracker[name];
                 movementModifierTracker.Remove(name);
+            }
+        }
+
+        private void OnFootstep(AnimationEvent animationEvent)
+        {
+            if (animationEvent.animatorClipInfo.weight > 0.5f)
+            {
+                if (FootstepAudioClips.Length > 0)
+                {
+                    var index = UnityEngine.Random.Range(0, FootstepAudioClips.Length);
+                    AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(characterController.center), FootstepAudioVolume);
+                }
+            }
+        }
+
+        private void OnLand(AnimationEvent animationEvent)
+        {
+            if (animationEvent.animatorClipInfo.weight > 0.5f)
+            {
+                AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(characterController.center), FootstepAudioVolume);
             }
         }
     }

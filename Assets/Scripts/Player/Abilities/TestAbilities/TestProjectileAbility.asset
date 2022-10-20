@@ -17,7 +17,8 @@ MonoBehaviour:
   NeedsRedraw: 0
   Requirements:
   - rid: 1155016406909583362
-  CastEffects: []
+  CastEffects:
+  - rid: 1155016517560565762
   DelayedCastEffects: []
   IconPainters: []
   <CastTime>k__BackingField: 0
@@ -28,4 +29,11 @@ MonoBehaviour:
     - rid: 1155016406909583362
       type: {class: EnergyCost, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
       data:
-        <Energy>k__BackingField: 50
+        <Energy>k__BackingField: 20
+    - rid: 1155016517560565762
+      type: {class: ProjectileCastType, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
+      data:
+        Effects:
+        - {fileID: 11400000, guid: fe16e60abd237a3439624e9eb57d7362, type: 2}
+        Projectile: {fileID: 5850607621077856237, guid: 3ea6c72ea64e7df479844f3ba872f5eb,
+          type: 3}

@@ -8,17 +8,18 @@ namespace Hypersycos.RogueFrame
     [System.Serializable]
     public class BoundedStatInstance : StatInstance
     {
-        public StatType StatType;
+        [field: SerializeField] public StatType StatType { get; protected set; }
         public class BoundedStatEvent : UnityEvent<BoundedStatInstance, float> { }
         public class CappedBoundedStatEvent : UnityEvent<BoundedStatInstance, float, float> { }
         [field: SerializeField] public float Value { get; protected set; }
         [field: SerializeField] public float MinValue { get; protected set; }
         [field: SerializeField] public float MaxValue { get; protected set; }
-        public float MinMaxValue { get; protected set; }
+        [field: SerializeField, ReadOnly] public float MinMaxValue { get; protected set; }
+        [field: SerializeField] public float BaseMax { get; protected set; }
 
-        protected readonly StatGainInstance PositiveGainModifier = new StatGainInstance();
-        protected readonly StatGainInstance NegativeGainModifier = new StatGainInstance();
-        protected readonly List<StatRegenerationModifier> StatRegenerationModifiers = new();
+        [SerializeField, ReadOnly] protected readonly StatGainInstance PositiveGainModifier = new StatGainInstance();
+        [SerializeField, ReadOnly] protected readonly StatGainInstance NegativeGainModifier = new StatGainInstance();
+        [SerializeField, ReadOnly] protected readonly List<StatRegenerationModifier> StatRegenerationModifiers = new();
 
         public CappedBoundedStatEvent OnFill = new();
         public BoundedStatEvent OnIncrease = new();
@@ -33,14 +34,16 @@ namespace Hypersycos.RogueFrame
             MinValue = minValue;
             MaxValue = maxValue;
             MinMaxValue = minMaxValue;
-            //StatType = statType;
+            BaseMax = maxValue;
         }
+
+        public BoundedStatInstance() : this(0, 0, 100, 0) { }
 
         public virtual void Tick(float deltaTime)
         {
             foreach (StatRegenerationModifier modifier in StatRegenerationModifiers)
             {
-                float change = modifier.Tick(deltaTime, MaxValue);
+                float change = modifier.Tick(deltaTime, MaxValue, Value);
                 float FlatMultiplier = modifier.Interval == 0 ? deltaTime : 1;
                 if (change > 0)
                 {
@@ -48,7 +51,7 @@ namespace Hypersycos.RogueFrame
                 }
                 else if (change < 0)
                 {
-                    RemoveValue(change, FlatMultiplier);
+                    RemoveValue(-change, FlatMultiplier);
                 }
             }
         }
@@ -76,28 +79,7 @@ namespace Hypersycos.RogueFrame
 
         protected virtual void Recalculate(BoundedStatModifier.ChangeBehaviour changeBehaviour)
         {
-            float temp = 0;
-            float multTemp = 1;
-            foreach (StatModifier modifier in StatModifiers)
-            {
-                if (multTemp != 1 && modifier.StackBehaviour != StatModifier.StackType.MultiplicativeAdditive)
-                {
-                    temp *= multTemp;
-                    multTemp = 1;
-                }
-                switch (modifier.StackBehaviour)
-                {
-                    case StatModifier.StackType.Flat:
-                        temp += modifier.Value;
-                        break;
-                    case StatModifier.StackType.MultiplicativeAdditive:
-                        multTemp += modifier.Value;
-                        break;
-                    case StatModifier.StackType.Multiplicative:
-                        temp *= modifier.Value;
-                        break;
-                }
-            }
+            float temp = ApplyModifiers(BaseMax);
             if (temp <= MinMaxValue) temp = MinMaxValue;
             if (temp == MaxValue) return;
             float maxChange = temp - MaxValue;
@@ -124,7 +106,7 @@ namespace Hypersycos.RogueFrame
             }
         }
 
-        public virtual float ApplyChange(float Amount)
+        protected virtual float ApplyChange(float Amount)
         {
             if (Amount > 0)
             {
@@ -133,11 +115,13 @@ namespace Hypersycos.RogueFrame
                 if (Value == MaxValue)
                 {
                     OnFill.Invoke(this, CappedAmount, Amount);
+                    Amount = CappedAmount;
                 }
                 else
                 {
                     OnIncrease.Invoke(this, Amount);
                 }
+                InterruptDOTs();
             }
             else if (Amount < 0)
             {
@@ -146,13 +130,33 @@ namespace Hypersycos.RogueFrame
                 if (Value == MinValue)
                 {
                     OnEmpty.Invoke(this, CappedAmount, Amount);
+                    Amount = CappedAmount;
                 }
                 else
                 {
                     OnDecrease.Invoke(this, Amount);
                 }
+                InterruptHOTs();
             }
             return Amount;
+        }
+
+        public void InterruptHOTs()
+        {
+            foreach (StatRegenerationModifier modifier in StatRegenerationModifiers)
+            {
+                if (modifier.Value > 0)
+                    modifier.Interrupt();
+            }
+        }
+        
+        public void InterruptDOTs()
+        {
+            foreach (StatRegenerationModifier modifier in StatRegenerationModifiers)
+            {
+                if (modifier.Value < 0)
+                    modifier.Interrupt();
+            }
         }
 
         public float AddValue(float Amount, float FlatMultiplier=1, bool AllowInversions = false)
@@ -174,7 +178,7 @@ namespace Hypersycos.RogueFrame
             {
                 return 0;
             }
-            return ApplyChange(-ModifiedAmount);
+            return -ApplyChange(-ModifiedAmount);
         }
 
         public bool CanRemoveValue(float Amount, float FlatMultiplier = 1, bool AllowInversions = false)
@@ -207,18 +211,13 @@ namespace Hypersycos.RogueFrame
             }
         }
 
-        public virtual void AddModifier(BoundedStatModifier modifier)
-        {
-            base.AddModifier(modifier);
-            Recalculate(modifier.AddBehaviour);
-        }
-
         public override void AddModifier(StatModifier modifier)
         {
             switch(modifier)
             {
                 case BoundedStatModifier bModifier:
-                    AddModifier(bModifier);
+                    base.AddModifier(modifier);
+                    Recalculate(bModifier.AddBehaviour);
                     break;
                 case StatRegenerationModifier rModifier:
                     StatRegenerationModifiers.Add(rModifier);
@@ -243,18 +242,13 @@ namespace Hypersycos.RogueFrame
             }
         }
 
-        public virtual void RemoveModifier(BoundedStatModifier modifier)
-        {
-            base.RemoveModifier(modifier);
-            Recalculate(modifier.RemoveBehaviour);
-        }
-
         public override void RemoveModifier(StatModifier modifier)
         {
             switch (modifier)
             {
                 case BoundedStatModifier bModifier:
-                    RemoveModifier(bModifier);
+                    base.RemoveModifier(modifier);
+                    Recalculate(bModifier.RemoveBehaviour);
                     break;
                 case StatRegenerationModifier rModifier:
                     StatRegenerationModifiers.Remove(rModifier);

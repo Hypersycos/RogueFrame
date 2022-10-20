@@ -19,7 +19,7 @@ namespace Hypersycos.RogueFrame
         private Quaternion? lastCastRotation = null;
         private double clientCastLockout = 0;
         private double serverCastLockout = 0;
-        [SerializeField] private List<AbilitySO> abilities = new();
+        [SerializeField] private List<Ability> abilities = new();
         [SerializeField] private PlayerState playerState;
         private float castSpeed = 1; //TODO: replace with generic stat
         [SerializeField] private Vector3 cameraOffset = new Vector3(0.7f, 0, -1);
@@ -60,7 +60,7 @@ namespace Hypersycos.RogueFrame
             {
                 clientCastLockout = -1;
                 CastServerRpc(currentAbility, camera.rotation);
-                AbilitySO selected = abilities[currentAbility];
+                Ability selected = abilities[currentAbility];
                 lastCastAbility = currentAbility;
                 if (selected.CastTime > 0)
                 {
@@ -101,7 +101,7 @@ namespace Hypersycos.RogueFrame
                 CastResultClientRpc(serverCastLockout, -1);
                 return;
             }
-            AbilitySO ability = abilities[abilityIndex];
+            Ability ability = abilities[abilityIndex];
             if (ability.CastCost(playerState))
             {
                 Vector3 cameraPosition = cameraRoot.position + lookDirection * cameraOffset;
@@ -143,7 +143,7 @@ namespace Hypersycos.RogueFrame
                 timeout -= Time.fixedDeltaTime;
                 yield return new WaitForFixedUpdate();
             }
-            AbilitySO delayedAbility = abilities[lastCastAbility];
+            Ability delayedAbility = abilities[lastCastAbility];
             Quaternion lookDirection = lastCastRotation ?? oldLookDirection;
             Vector3 cameraPosition = cameraRoot.position + lookDirection * cameraOffset;
             delayedAbility.DelayedCastEffect(cameraPosition, lookDirection, playerState);

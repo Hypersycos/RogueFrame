@@ -17,14 +17,6 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: dbcb0e61fcccfb7409e53ce2bd165bf2
   m_SerializeEntries:
-  - m_GUID: f1b2bec13add6a14c8b64d438aca814e
-    m_Address: Armour
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: 91394556166882745aaad90c9f1b2429
-    m_Address: CastSpeed
-    m_ReadOnly: 0
-    m_SerializedLabels: []
   - m_GUID: e31924feea1e91e4a8e3eb09122090d0
     m_Address: Energy
     m_ReadOnly: 0

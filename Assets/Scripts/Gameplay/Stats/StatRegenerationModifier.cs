@@ -12,7 +12,8 @@ namespace Hypersycos.RogueFrame
         private float DelayTimer = 0;
         private float DelayRate;
 
-        public StatRegenerationModifier(StackType stackBehaviour, int? stackLevel, float value, float tickRate = 0, float delay = 0, float delayRate = 0) : base(stackBehaviour, stackLevel, value)
+        public StatRegenerationModifier(StackType stackBehaviour, int? stackLevel, float value, CharacterState characterSource,
+            float tickRate = 0, float delay = 0, float delayRate = 0) : base(stackBehaviour, stackLevel, value, characterSource)
         {
             if (tickRate == 0)
             {
@@ -26,7 +27,8 @@ namespace Hypersycos.RogueFrame
             DelayRate = delayRate;
         }
 
-        public StatRegenerationModifier(StackType stackBehaviour, int? stackLevel, float value, string sourceName, float tickRate = 0, float delay = 0, float delayRate = 0) : base(stackBehaviour, stackLevel, value, sourceName)
+        public StatRegenerationModifier(StackType stackBehaviour, int? stackLevel, float value, CharacterState characterSource,
+            string sourceName, float tickRate = 0, float delay = 0, float delayRate = 0) : base(stackBehaviour, stackLevel, value, characterSource, sourceName)
         {
             if (tickRate == 0)
             {
@@ -45,7 +47,7 @@ namespace Hypersycos.RogueFrame
             DelayTimer = 0;
         }
 
-        public float Tick(float TimeDelta, float MaxValue)
+        public float Tick(float TimeDelta, float MaxValue, float HealthValue)
         {
             if (DelayTimer < Delay)
             {
@@ -68,6 +70,10 @@ namespace Hypersycos.RogueFrame
             if (StackBehaviour == StackType.Multiplicative)
             {
                 temp *= MaxValue;
+            }
+            else if (StackBehaviour == StackType.MultiplicativeAdditive)
+            {
+                temp *= HealthValue;
             }
             if (DelayTimer < Delay)
             {

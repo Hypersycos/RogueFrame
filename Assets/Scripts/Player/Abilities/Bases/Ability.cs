@@ -1,15 +1,21 @@
-﻿using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Hypersycos.RogueFrame
 {
-    public abstract class Ability
+
+    [CreateAssetMenu(fileName = "New Ability", menuName = "Abilities/Ability")]
+    public class Ability : ScriptableObject
     {
-        public virtual string Name { get; }
-        public virtual string Description { get; }
-        public virtual bool NeedsRedraw { get; set; }
-        public virtual IAbilityRequirement[] Requirements { get; }
-        public virtual double CastTime { get; }
-        public virtual double AnimationTime { get; }
+        [field: SerializeField] public string Name { get; private set; }
+        [field: SerializeField] public string Description { get; private set; }
+        public bool NeedsRedraw;
+        [SerializeField] [field: SerializeReference] private List<IAbilityRequirement> Requirements = new();
+        [SerializeField] [field: SerializeReference] private List<ICastType> CastEffects;
+        [SerializeField] [field: SerializeReference] private List<ICastType> DelayedCastEffects;
+        [SerializeField] [field: SerializeReference] private List<IDrawIcon> IconPainters;
+        [field: SerializeField] public double CastTime { get; private set; }
+        [field: SerializeField] public double AnimationTime { get; private set; }
 
         public bool CanCast(PlayerState state)
         {
@@ -34,8 +40,42 @@ namespace Hypersycos.RogueFrame
             }
             return true;
         }
-        public abstract void CastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster);
-        public abstract void DelayedCastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster);
-        public abstract void DrawIcon(Canvas container);
+        public void CastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster)
+        {
+            foreach (ICastType castEffect in CastEffects)
+            {
+                List<ICastEffect> effects = castEffect.CloneEffects();
+                castEffect.BeforeCast(caster, effects);
+                castEffect.Cast(cameraPosition, lookDirection, caster, effects);
+            }
+        }
+        public void DelayedCastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster)
+        {
+            foreach (ICastType castEffect in DelayedCastEffects)
+            {
+                List<ICastEffect> effects = castEffect.CloneEffects();
+                castEffect.BeforeCast(caster, effects);
+                castEffect.Cast(cameraPosition, lookDirection, caster, effects);
+            }
+        }
+        public void QuickDrawIcon(Canvas container)
+        {
+            foreach (IDrawIcon drawIcon in IconPainters)
+            {
+                drawIcon.QuickDrawIcon(container);
+            }
+        }
+
+        public void FullDrawIcon(Canvas container)
+        {
+            foreach (Transform child in container.transform)
+            {
+                Destroy(child.gameObject);
+            }
+            foreach (IDrawIcon drawIcon in IconPainters)
+            {
+                drawIcon.FullDrawIcon(container);
+            }
+        }
     }
 }

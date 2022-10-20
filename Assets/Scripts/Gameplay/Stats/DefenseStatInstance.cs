@@ -7,29 +7,31 @@ namespace Hypersycos.RogueFrame
     [System.Serializable]
     public class DefenseStatInstance : BoundedStatInstance
     {
-        SemiBoundedStatInstance ReductionStat;
+        [field: SerializeField] public SemiBoundedStatInstance ReductionStat { get; protected set; }
+        [field: SerializeField] public bool IsOverhealth { get; protected set; }
         float ReductionValue => ReductionStat is null ? 50 : ReductionStat.Value;
-        [SerializeField] float DamageReduction => (ReductionValue - 50) / (ReductionValue + 50);
-        [SerializeField] float EHP => Value * (ReductionValue + 50) / 100;
-        protected List<DefenseGate> defenseGates = new();
+        float DamageReduction => (ReductionValue - 50) / (ReductionValue + 50);
+        float DamageMultiplier => 100 / (ReductionValue + 50);
+        float EHPMultiplier => (ReductionValue + 50) / 100;
+        float EHP => Value * EHPMultiplier;
+        [SerializeField] protected List<DefenseGate> defenseGates = new();
         public virtual bool IsActive => MaxValue > 0 && (Value > 0 || defenseGates.Exists(gate => gate.IsActive));
-        public DefenseStatInstance Above;
-        public DefenseStatInstance Below;
         public DefenseStatInstance(float maxValue, SemiBoundedStatInstance reductionStat = null) : base(maxValue, 0, maxValue, 0)
         {
             ReductionStat = reductionStat;
         }
 
-        public override float ApplyChange(float Amount)
+        public DefenseStatInstance() : this(100) { }
+        protected override float ApplyChange(float Amount)
         {
             if (Amount < 0)
             {
+                Amount *= DamageMultiplier; 
                 foreach (DefenseGate gate in defenseGates)
                 {
                     if (gate.IsAvailable)
                     {
                         Amount = gate.TestDamage(Amount, Value, Mathf.Max(Value - Amount, 0));
-                        if (Amount == 0) return 0;
                     }
                 }
             }
@@ -39,22 +41,17 @@ namespace Hypersycos.RogueFrame
                 float Overflow = Amount - ModifiedAmount;
                 if (Amount > 0)
                 {
-                    if (Above != null)
-                    {
-                        Overflow = PositiveGainModifier.Reverse(Overflow);
-                        return Above.AddValue(Overflow);
-                    }
+                    Overflow = PositiveGainModifier.Reverse(Overflow);
+                    return Overflow;
                 }
                 else
                 {
-                    if (Above != null)
-                    {
-                        Overflow = NegativeGainModifier.Reverse(Overflow);
-                        return Below.RemoveValue(Overflow);
-                    }
+                    Overflow *= EHPMultiplier;
+                    Overflow = NegativeGainModifier.Reverse(Overflow);
+                    return Overflow;
                 }
             }
-            return ModifiedAmount;
+            return 0;
         }
 
         public void AddGate(DefenseGate gate)

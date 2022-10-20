@@ -9,10 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 3666cc498c82455419c018bfc1495c7b, type: 3}
   m_Name: MoveSpeed
   m_EditorClassIdentifier: Assembly-CSharp:Hypersycos.RogueFrame:StatType
   <Name>k__BackingField: Movement Speed
-  <Description>k__BackingField: 
-  <DefaultStartValue>k__BackingField: 0
+  <Description>k__BackingField: Gotta go fast
+  <Color>k__BackingField: {r: 0, g: 0, b: 0, a: 0}
+  <DefaultStartValue>k__BackingField: 1
   <DefaultStartIsPercentage>k__BackingField: 0

@@ -9,10 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 3666cc498c82455419c018bfc1495c7b, type: 3}
   m_Name: CastSpeed
-  m_EditorClassIdentifier: Assembly-CSharp:Hypersycos.RogueFrame:StatType
+  m_EditorClassIdentifier: 
   <Name>k__BackingField: Casting Speed
-  <Description>k__BackingField: How fast casting animations play
-  <DefaultStartValue>k__BackingField: 0
+  <Description>k__BackingField: Affects the casting time of ability animations
+  <Color>k__BackingField: {r: 0, g: 0, b: 0, a: 0}
+  <DefaultStartValue>k__BackingField: 1
   <DefaultStartIsPercentage>k__BackingField: 0

@@ -1,0 +1,30 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using static Hypersycos.RogueFrame.DefensePool;
+
+namespace Hypersycos.RogueFrame
+{
+    [Serializable]
+    [CreateAssetMenu(fileName = "New Status Effect", menuName = "Abilities/Status Effect")]
+    public class StatusCastEffect : ICastEffect
+    {
+        [field: SerializeField] [field: SerializeReference] public StatusInstance statusEffect { get; private set; }
+        public override void AffectCharacter(CharacterState characterState)
+        {
+            characterState.AddStatus(statusEffect);
+        }
+
+        public override void AffectObject(GameObject obj)
+        {
+            return;
+        }
+
+        public override void Initialise(CharacterState owner)
+        {
+            statusEffect = statusEffect.CloneInstance();
+            statusEffect.SetOwner(owner);
+        }
+    }
+}

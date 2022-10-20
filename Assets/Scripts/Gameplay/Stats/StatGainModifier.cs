@@ -6,12 +6,12 @@ namespace Hypersycos.RogueFrame
 {
     public class StatGainModifier : StatModifier
     {
-        public StatGainModifier(StackType stackBehaviour, int? stackLevel, float value, string sourceName, Direction gainDirection) : base(stackBehaviour, stackLevel, value, sourceName)
+        public StatGainModifier(StackType stackBehaviour, int? stackLevel, float value, CharacterState characterSource, string sourceName, Direction gainDirection) : base(stackBehaviour, stackLevel, value, characterSource, sourceName)
         {
             GainDirection = gainDirection;
         }
 
-        public StatGainModifier(StackType stackBehaviour, int? stackLevel, float value, Direction gainDirection) : base(stackBehaviour, stackLevel, value)
+        public StatGainModifier(StackType stackBehaviour, int? stackLevel, float value, CharacterState characterSource, Direction gainDirection) : base(stackBehaviour, stackLevel, value, characterSource)
         {
             GainDirection = gainDirection;
         }

@@ -5,6 +5,7 @@ using UnityEngine.Events;
 
 namespace Hypersycos.RogueFrame
 {
+    [System.Serializable]
     public abstract class DefenseGate
     {
         public bool IsActive { get; protected set; }

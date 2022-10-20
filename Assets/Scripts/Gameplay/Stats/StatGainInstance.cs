@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Hypersycos.RogueFrame
 {
+    [Serializable]
     public class StatGainInstance : StatInstance
     {
         private readonly Dictionary<float, float> cache = new();
@@ -20,28 +21,7 @@ namespace Hypersycos.RogueFrame
             {
                 return cache[Value];
             }
-            float temp = Value;
-            float multTemp = 1;
-            foreach (StatModifier modifier in StatModifiers)
-            {
-                if (multTemp != 1 && modifier.StackBehaviour != StatModifier.StackType.MultiplicativeAdditive)
-                {
-                    temp *= multTemp;
-                    multTemp = 1;
-                }
-                switch (modifier.StackBehaviour)
-                {
-                    case StatModifier.StackType.Flat:
-                        temp += modifier.Value * FlatMultiplier;
-                        break;
-                    case StatModifier.StackType.MultiplicativeAdditive:
-                        multTemp += modifier.Value;
-                        break;
-                    case StatModifier.StackType.Multiplicative:
-                        temp *= modifier.Value;
-                        break;
-                }
-            }
+            float temp = ApplyModifiers(Value, FlatMultiplier);
             cache[Value] = temp;
             return temp;
         }
@@ -52,6 +32,7 @@ namespace Hypersycos.RogueFrame
             float multTemp = 1;
             foreach (StatModifier modifier in StatModifiers)
             {
+                //TODO: Fix this, broken with multiplicativeadditive
                 if (multTemp != 1 && modifier.StackBehaviour != StatModifier.StackType.MultiplicativeAdditive)
                 {
                     temp /= multTemp;

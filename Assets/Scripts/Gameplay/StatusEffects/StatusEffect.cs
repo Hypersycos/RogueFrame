@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Hypersycos.RogueFrame
 {
@@ -7,14 +8,17 @@ namespace Hypersycos.RogueFrame
     {
         public enum StackMethod
         {
-            Additive,
-            StackingRefresh,
-            SingleRefresh,
-            Instance
+            Additive, //Combine timers
+            StackingRefresh, //Reset all timers
+            SingleRefresh, //Pick biggest number
+            Instance, //Individual instances
+            SingleInstance, //Pick the biggest instance
+            SingleInstancePerSource //Pick the biggest instance per source
         }
 
         [field: SerializeField] public string Name { get; private set; }
         [field: SerializeField] public string Description { get; private set; }
         [field: SerializeField] public StackMethod StackType { get; private set; }
+        [field: SerializeField] public float DefaultDuration { get; private set; }
     }
 }

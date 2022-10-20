@@ -1,9 +1,18 @@
-﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Hypersycos.RogueFrame
 {
-    public interface ICastEffect
+    [System.Serializable]
+    public abstract class ICastEffect : ScriptableObject
     {
-        void Cast(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster);
+        public abstract void AffectCharacter(CharacterState characterState);
+        public abstract void AffectObject(GameObject obj);
+        public abstract void Initialise(CharacterState owner);
+        public ICastEffect Clone()
+        {
+            return Instantiate(this);
+        }
     }
 }

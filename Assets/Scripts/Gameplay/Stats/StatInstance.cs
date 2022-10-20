@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace Hypersycos.RogueFrame
 {
+    [Serializable]
     public class StatInstance
     {
-        protected List<StatModifier> StatModifiers = new List<StatModifier>();
+        [SerializeField, ReadOnly] protected List<StatModifier> StatModifiers = new List<StatModifier>();
         protected Dictionary<string, List<StatModifier>> SingletonStatModifiers = new Dictionary<string, List<StatModifier>>();
         protected class ByPriority : IComparer<StatModifier>
         {
@@ -86,6 +88,33 @@ namespace Hypersycos.RogueFrame
                     SingletonStatModifiers[modifier.SourceName].Remove(modifier);
                 }
             }
+        }
+
+        protected float ApplyModifiers(float start, float flatMultiplier=1)
+        {
+            //TODO: This will break if there are multiple consecutive layers of multiplicativeadditive
+            float multTemp = 1;
+            foreach (StatModifier modifier in StatModifiers)
+            {
+                if (multTemp != 1 && modifier.StackBehaviour != StatModifier.StackType.MultiplicativeAdditive)
+                {
+                    start *= multTemp;
+                    multTemp = 1;
+                }
+                switch (modifier.StackBehaviour)
+                {
+                    case StatModifier.StackType.Flat:
+                        start += modifier.Value * flatMultiplier;
+                        break;
+                    case StatModifier.StackType.MultiplicativeAdditive:
+                        multTemp += modifier.Value;
+                        break;
+                    case StatModifier.StackType.Multiplicative:
+                        start *= modifier.Value;
+                        break;
+                }
+            }
+            return start;
         }
     }
 }
