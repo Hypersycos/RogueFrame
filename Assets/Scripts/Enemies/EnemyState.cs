@@ -12,9 +12,9 @@ namespace Hypersycos.RogueFrame
             if (IsServer)
             {
                 Health.OnEmpty.AddListener((_, _, _) => StartCoroutine(FullHealAfter(3)));
-                HitPoints = new DefensePool(new List<DefenseStatInstance>() { Health }, this);
-                GetComponentInChildren<StatBarScript>().AddStats(new List<BoundedStatInstance>() { Health });
             }
+            HitPoints = new DefensePool(new List<DefenseStatInstance>() { Health }, this);
+            GetComponentInChildren<StatBarScript>().AddStats(new List<BoundedStatInstance>() { Health });
         }
 
         IEnumerator FullHealAfter(float seconds)

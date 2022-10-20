@@ -19,7 +19,7 @@ namespace Hypersycos.RogueFrame
         {
             while (true)
             {
-                Projectile.Cast(transform.position - new Vector3(0, 2, 0), Quaternion.identity, owner, Projectile.CloneEffects());
+                Projectile.Cast(transform.position - new Vector3(0, 2, 0), Quaternion.identity, owner);
                 yield return new WaitForSeconds(1f);
             }
         }

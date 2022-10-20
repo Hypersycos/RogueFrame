@@ -23,7 +23,9 @@ namespace Hypersycos.RogueFrame
 
         public void AddHeat(CharacterState victim, DamageInstance damage)
         {
+            if (damage.OneTimeEffects.Contains("Ignite")) return;
             StatusInstance HeatInstance = new HeatStatusInstance(damage.Amount / Heat.DefaultDuration * 2 * Strength, damage.owner, Heat, Heat.DefaultDuration * Duration);
+            HeatInstance.OneTimeEffects.Add("Ignite");
             victim.AddStatus(HeatInstance);
         }
 

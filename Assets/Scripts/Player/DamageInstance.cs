@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using static Hypersycos.RogueFrame.DefensePool;
 
@@ -12,6 +13,7 @@ namespace Hypersycos.RogueFrame
         public StatTypeTarget ValidStatTypes;
         public CharacterState owner { get; private set; } = null;
         [SerializeField, ReadOnly] private float? _ActualAmount = null;
+        public List<string> OneTimeEffects = new();
         public float ActualAmount
         {
             get
@@ -42,6 +44,16 @@ namespace Hypersycos.RogueFrame
             this.Amount = amount;
             ActualAmount = amount;
             ValidStatTypes = validStatTypes;
+        }
+
+        public DamageInstance(DamageInstance inst)
+        {
+            IsDamage = inst.IsDamage;
+            Amount = inst.Amount;
+            ActualAmount = Amount;
+            ValidStatTypes = inst.ValidStatTypes;
+            owner = null;
+            OneTimeEffects = new(inst.OneTimeEffects);
         }
 
         public DamageInstance()

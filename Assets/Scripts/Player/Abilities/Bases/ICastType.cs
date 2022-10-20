@@ -18,41 +18,37 @@ namespace Hypersycos.RogueFrame
             }
             return clone;
         }
+        public abstract void Cast(Vector3 cameraPosition, Quaternion lookDirection, CharacterState caster);
 
-        public void BeforeCast(CharacterState caster, List<ICastEffect> castEffects)
+        public void OnHit(CharacterState target, CharacterState owner, Vector3 location)
         {
-            foreach (ICastEffect effect in castEffects)
+            foreach (ICastEffect effect in Effects)
             {
-                effect.Initialise(caster);
-            }
-        }
-        public abstract void Cast(Vector3 cameraPosition, Quaternion lookDirection, CharacterState caster, List<ICastEffect> castEffects);
-
-        public void OnHit(CharacterState character, List<ICastEffect> castEffects)
-        {
-            foreach (ICastEffect effect in castEffects)
-            {
-                effect.AffectCharacter(character);
+                ICastEffect clone = effect.Clone();
+                clone.Initialise(owner);
+                clone.AffectCharacter(target, location);
             }
         }
 
-        public void OnHit(GameObject hit, List<ICastEffect> castEffects)
+        public void OnHit(GameObject hit, CharacterState owner, Vector3 location)
         {
-            foreach (ICastEffect effect in castEffects)
+            foreach (ICastEffect effect in Effects)
             {
-                effect.AffectObject(hit);
+                ICastEffect clone = effect.Clone();
+                clone.Initialise(owner);
+                clone.AffectObject(hit, location);
             }
         }
 
-        public void OnHit(CharacterState character, GameObject hit, List<ICastEffect> castEffects)
+        public void OnHit(CharacterState character, GameObject hit, CharacterState owner, Vector3 location)
         {
             if (character == null)
             {
-                OnHit(hit, castEffects);
+                OnHit(hit, owner, location);
             }
             else
             {
-                OnHit(character, castEffects);
+                OnHit(character, owner, location);
             }
         }
     }

@@ -11,12 +11,12 @@ namespace Hypersycos.RogueFrame
     public class StatusCastEffect : ICastEffect
     {
         [field: SerializeField] [field: SerializeReference] public StatusInstance statusEffect { get; private set; }
-        public override void AffectCharacter(CharacterState characterState)
+        public override void AffectCharacter(CharacterState characterState, Vector3 location)
         {
             characterState.AddStatus(statusEffect);
         }
 
-        public override void AffectObject(GameObject obj)
+        public override void AffectObject(GameObject obj, Vector3 location)
         {
             return;
         }

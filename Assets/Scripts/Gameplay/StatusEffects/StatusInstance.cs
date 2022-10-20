@@ -2,6 +2,7 @@
 using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Hypersycos.RogueFrame
 {
@@ -10,6 +11,7 @@ namespace Hypersycos.RogueFrame
     {
         [field: SerializeField] public StatusEffect StatusEffect { get; protected set; }
         public float Amount;
+        public List<string> OneTimeEffects = new();
         public CharacterState owner { get; private set; } = null;
 
         public StatusInstance(float amount, CharacterState owner, StatusEffect statusEffect) : this(amount, statusEffect)

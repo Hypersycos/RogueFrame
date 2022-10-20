@@ -7,8 +7,8 @@ namespace Hypersycos.RogueFrame
     [System.Serializable]
     public abstract class ICastEffect : ScriptableObject
     {
-        public abstract void AffectCharacter(CharacterState characterState);
-        public abstract void AffectObject(GameObject obj);
+        public abstract void AffectCharacter(CharacterState characterState, Vector3 location);
+        public abstract void AffectObject(GameObject obj, Vector3 location);
         public abstract void Initialise(CharacterState owner);
         public ICastEffect Clone()
         {

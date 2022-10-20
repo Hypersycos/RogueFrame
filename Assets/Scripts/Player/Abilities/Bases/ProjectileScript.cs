@@ -16,6 +16,7 @@ namespace Hypersycos.RogueFrame
         [SerializeField] private bool CanPunchthroughEnemies = false;
         [SerializeField] private bool CanPunchthroughTerrain = false;
         [SerializeField] private float MaxPunchthroughLength = 0;
+        private bool CanHitTriggers = false;
 
         float distanceTravelled = 0;
         float PunchThrough = 0;
@@ -26,14 +27,17 @@ namespace Hypersycos.RogueFrame
         int TerrainHits = 0;
         Vector3 StartPosition;
         List<CharacterState> alreadyHit = new();
-        Action<CharacterState> OnHitChar;
-        Action<GameObject> OnHitObj;
+        Action<CharacterState, Vector3> OnHitChar;
+        Action<GameObject, Vector3> OnHitObj;
 
         private void OnTriggerEnter(Collider other)
         {
-            Collided(other);
-            if (LastCollision == null)
-                LastCollision = transform.position;
+            if (CanHitTriggers)
+            {
+                Collided(other);
+                if (LastCollision == null)
+                    LastCollision = transform.position;
+            }
         }
         private void OnCollisionEnter(Collision collision)
         {
@@ -44,16 +48,17 @@ namespace Hypersycos.RogueFrame
 
         private void Collided(Collider other)
         {
+            //TODO: transform.position is not very accurate
             CharacterState enemy = other.GetComponent<CharacterState>();
             if (enemy == null)
             {
-                OnHitObj(other.gameObject);
+                OnHitObj(other.gameObject, transform.position);
                 if (!CanPunchthroughTerrain) Expire();
                 TerrainHits++;
             }
             else if (!alreadyHit.Contains(enemy))
             {
-                OnHitChar(enemy);
+                OnHitChar(enemy, transform.position);
                 if (CanPunchthroughEnemies)
                     alreadyHit.Add(enemy);
                 else
@@ -81,19 +86,23 @@ namespace Hypersycos.RogueFrame
 
         private void OnTriggerExit(Collider other)
         {
-            if (MaxPunchthroughLength > 0 && LastCollision != null)
+            if (CanHitTriggers)
             {
-                PunchThrough += (transform.position - (Vector3)LastCollision).magnitude;
-                if (PunchThrough > MaxPunchthroughLength)
-                    Expire();
+                if (MaxPunchthroughLength > 0 && LastCollision != null)
+                {
+                    PunchThrough += (transform.position - (Vector3)LastCollision).magnitude;
+                    if (PunchThrough > MaxPunchthroughLength)
+                        Expire();
+                }
             }
         }
 
-        public void Initialise(Action<CharacterState> onHit, Action<GameObject> onHitObj)
+        public void Initialise(Action<CharacterState, Vector3> onHit, Action<GameObject, Vector3> onHitObj)
         {
             OnHitChar = onHit;
             OnHitObj = onHitObj;
             GetComponent<Rigidbody>().velocity = transform.rotation * LaunchVelocity;
+            CanHitTriggers = GetComponent<Collider>().isTrigger;
             StartPosition = transform.position;
         }
 

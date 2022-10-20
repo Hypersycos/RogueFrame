@@ -44,18 +44,14 @@ namespace Hypersycos.RogueFrame
         {
             foreach (ICastType castEffect in CastEffects)
             {
-                List<ICastEffect> effects = castEffect.CloneEffects();
-                castEffect.BeforeCast(caster, effects);
-                castEffect.Cast(cameraPosition, lookDirection, caster, effects);
+                castEffect.Cast(cameraPosition, lookDirection, caster);
             }
         }
         public void DelayedCastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster)
         {
             foreach (ICastType castEffect in DelayedCastEffects)
             {
-                List<ICastEffect> effects = castEffect.CloneEffects();
-                castEffect.BeforeCast(caster, effects);
-                castEffect.Cast(cameraPosition, lookDirection, caster, effects);
+                castEffect.Cast(cameraPosition, lookDirection, caster);
             }
         }
         public void QuickDrawIcon(Canvas container)

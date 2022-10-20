@@ -16,6 +16,8 @@ namespace Hypersycos.RogueFrame
 
         protected virtual void FixedUpdate()
         {
+            if (!IsServer) return;
+
             HitPoints.Tick(Time.fixedDeltaTime);
             List<StatusInstance> ToRemove = new();
             foreach(List<StatusInstance> instances in statusInstances.Values)
@@ -63,12 +65,18 @@ namespace Hypersycos.RogueFrame
         public CharacterStateHealthEvent BeforeDamage = new();
         public CharacterStateHealthEvent BeforeHeal = new();
 
+        public CharacterStateStatusEvent BeforeStatusAdded = new();
+        public CharacterStateStatusEvent AfterStatusAdded = new();
+        public CharacterStateStatusEvent BeforeStatusRemoved = new();
+        public CharacterStateStatusEvent AfterStatusRemoved = new();
+
         public int GetStatusCount(StatusEffect statusEffect)
         {
             return statusInstances.ContainsKey(statusEffect) ? statusInstances[statusEffect].Count : 0;
         }
         public void AddStatus(StatusInstance instance)
         {
+            BeforeStatusAdded.Invoke(this, instance);
             if (!statusInstances.ContainsKey(instance.StatusEffect))
             {
                 statusInstances.Add(instance.StatusEffect, new List<StatusInstance>());
@@ -119,13 +127,16 @@ namespace Hypersycos.RogueFrame
                         break;
                 }
             }
+            AfterStatusAdded.Invoke(this, instance);
         }
 
         public void RemoveStatus(StatusInstance instance)
         {
+            BeforeStatusRemoved.Invoke(this, instance);
             List<StatusInstance> insts = statusInstances[instance.StatusEffect];
             insts.Remove(instance);
             UnapplyStatus(instance);
+            AfterStatusRemoved.Invoke(this, instance);
         }
 
         public virtual void ApplyStatus(StatusInstance instance)
@@ -193,6 +204,11 @@ namespace Hypersycos.RogueFrame
         public Color GetDamageColor()
         {
             return HitPoints.GetDamageColor();
+        }
+
+        public virtual void Teleport(Vector3 NewPosition)
+        {
+            transform.position = NewPosition;
         }
     }
 }

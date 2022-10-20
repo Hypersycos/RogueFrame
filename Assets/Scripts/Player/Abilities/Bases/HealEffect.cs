@@ -13,12 +13,12 @@ namespace Hypersycos.RogueFrame
         DamageInstance healInstance;
         [SerializeField] float Amount;
         [SerializeField] StatTypeTarget ValidTargets;
-        public override void AffectCharacter(CharacterState characterState)
+        public override void AffectCharacter(CharacterState characterState, Vector3 location)
         {
             characterState.ApplyHealInstance(healInstance);
         }
 
-        public override void AffectObject(GameObject obj)
+        public override void AffectObject(GameObject obj, Vector3 location)
         {
             return;
         }

@@ -8,8 +8,32 @@ namespace Hypersycos.RogueFrame
 {
     public class PlayerState : CharacterState
     {
+        private class DamageTextInstance
+        {
+            public TMP_Text text;
+            public float damage;
+            public float timer;
+            public float angle;
+
+            public DamageTextInstance(TMP_Text text, float damage, float timer, float angle)
+            {
+                this.text = text;
+                this.damage = damage;
+                this.timer = timer;
+                this.angle = angle;
+            }
+        }
         [SerializeField] TMP_Text DamageTickPrefab;
         ClientRpcParams clientRpcParams;
+
+        float DamageNumberThreshold = 1;
+        float DamageCumulative = 0;
+        float HealCumulative = 0;
+
+        Dictionary<StatBarRotator, DamageTextInstance> LastDamageNumbers = new();
+        Dictionary<StatBarRotator, DamageTextInstance> LastHealNumbers = new();
+        float TextMergeTimer = 0.15f;
+
         void Start()
         {
             Team = 0;
@@ -44,8 +68,41 @@ namespace Hypersycos.RogueFrame
 
         protected override void FixedUpdate()
         {
-            base.FixedUpdate();
-            Energy.Tick(Time.fixedDeltaTime);
+            if (IsServer)
+            {
+                base.FixedUpdate();
+                Energy.Tick(Time.fixedDeltaTime);
+            }
+            if (IsOwner)
+            {
+                List<StatBarRotator> toRemove = new();
+                foreach(StatBarRotator key in LastDamageNumbers.Keys)
+                {
+                    LastDamageNumbers[key].timer -= Time.fixedDeltaTime;
+                    if (LastDamageNumbers[key].timer <= 0)
+                    {
+                        toRemove.Add(key);
+                    }
+                }
+                foreach(StatBarRotator key in toRemove)
+                {
+                    LastDamageNumbers.Remove(key);
+                }
+
+                toRemove = new();
+                foreach (StatBarRotator key in LastHealNumbers.Keys)
+                {
+                    LastHealNumbers[key].timer -= Time.fixedDeltaTime;
+                    if (LastHealNumbers[key].timer <= 0)
+                    {
+                        toRemove.Add(key);
+                    }
+                }
+                foreach (StatBarRotator key in toRemove)
+                {
+                    LastHealNumbers.Remove(key);
+                }
+            }
         }
 
         [SerializeField] protected BoundedStatInstance Energy = new BoundedStatInstance(100, 0, 100);
@@ -70,36 +127,102 @@ namespace Hypersycos.RogueFrame
 
         private void CreateDamageNumber(CharacterState victim, DamageInstance damage)
         {
-            Color c = victim.GetDamageColor();
             float damageNumber = damage.ActualAmount;
+            if (damageNumber < DamageNumberThreshold)
+            {
+                DamageCumulative += damageNumber;
+                if (DamageCumulative > DamageNumberThreshold)
+                {
+                    damageNumber = DamageCumulative;
+                    DamageCumulative = 0;
+                }
+                else
+                {
+                    return;
+                }
+            }
             float coefficient = (damageNumber / victim.HitPoints.MaxValue * 4 + 1);
-            CreateDamageNumberClientRpc(victim.NetworkObject, (int)damageNumber, coefficient, c, clientRpcParams);
+            Color c = victim.GetDamageColor();
+            CreateDamageNumberClientRpc(victim.NetworkObject, damageNumber, c, clientRpcParams);
         }
 
         private void CreateHealNumber(CharacterState victim, DamageInstance heal)
         {
+            float healNumber = heal.ActualAmount;
+            if (healNumber < DamageNumberThreshold)
+            {
+                HealCumulative += healNumber;
+                if (HealCumulative > DamageNumberThreshold)
+                {
+                    healNumber = HealCumulative;
+                    HealCumulative = 0;
+                }
+                else
+                {
+                    return;
+                }
+            }
             Color c = victim.GetDamageColor();
             c = new Color(0, 1f, 0) * 0.7f + c * 0.3f;
-            float healNumber = heal.ActualAmount;
             float coefficient = (healNumber / victim.HitPoints.MaxValue * 4 + 1);
-            CreateDamageNumberClientRpc(victim.NetworkObject, (int)healNumber, coefficient, c, clientRpcParams);
+            CreateHealNumberClientRpc(victim.NetworkObject, healNumber, c, clientRpcParams);
         }
 
         [ClientRpc]
-        private void CreateDamageNumberClientRpc(NetworkObjectReference victimRef, int number, float coefficient, Color c, ClientRpcParams clientRpcParams = default)
+        private void CreateHealNumberClientRpc(NetworkObjectReference victimRef, float number, Color c, ClientRpcParams clientRpcParams = default)
         {
-            StatBarRotator statBarRotator = ((GameObject)victimRef).GetComponentInChildren<StatBarRotator>();
-            TMP_Text instance = Instantiate(DamageTickPrefab, statBarRotator.transform);
+            CharacterState victim = ((GameObject)victimRef).GetComponent<CharacterState>();
+            StatBarRotator statBarRotator = victim.GetComponentInChildren<StatBarRotator>();
+            DamageTextInstance instance = CreateDamageNumberCommon(statBarRotator, number, LastHealNumbers);
+            float coefficient = (number / victim.HitPoints.MaxValue * 4 + 1);
+            UpdateDamageText(instance, coefficient, c);
+        }
+
+
+        [ClientRpc]
+        private void CreateDamageNumberClientRpc(NetworkObjectReference victimRef, float number, Color c, ClientRpcParams clientRpcParams = default)
+        {
+            CharacterState victim = ((GameObject)victimRef).GetComponent<CharacterState>();
+            StatBarRotator statBarRotator = victim.GetComponentInChildren<StatBarRotator>();
+            DamageTextInstance instance = CreateDamageNumberCommon(statBarRotator, number, LastDamageNumbers);
+            float coefficient = (number / victim.HitPoints.MaxValue * 4 + 1);
+            UpdateDamageText(instance, coefficient, c);
+        }
+
+        private DamageTextInstance CreateDamageNumberCommon(StatBarRotator statBarRotator, float number, Dictionary<StatBarRotator, DamageTextInstance> dict)
+        {
+            if (dict.ContainsKey(statBarRotator))
+            {
+                dict[statBarRotator].damage += number;
+                return dict[statBarRotator];
+            }
+            else
+            {
+                TMP_Text text = Instantiate(DamageTickPrefab, statBarRotator.transform);
+                DamageTextInstance instance = new DamageTextInstance(text, number, TextMergeTimer, Random.Range(-1f, 1f));
+                dict.Add(statBarRotator, instance);
+                return instance;
+            }
+        }
+
+        private void UpdateDamageText(DamageTextInstance inst, float coefficient, Color c)
+        {
+            TMP_Text instance = inst.text;
             instance.color = c;
-            instance.text = number.ToString();
+            instance.text = ((int)inst.damage).ToString();
             instance.fontSize = coefficient * 50 + 50;
+
             DamageInstanceScript script = instance.GetComponent<DamageInstanceScript>();
-            float oldLife = script.lifetime;
-            script.lifetime = script.lifetime * (coefficient / 4 + 0.5f);
-            script.speed = script.speed * oldLife / script.lifetime;
-            float angle = 100 - coefficient * 20;
-            angle = Random.Range(-angle, angle) / 360 * 2*Mathf.PI;
+            script.lifetime = 0.5f * (coefficient / 4 + 0.5f);
+            script.speed = 500 * 0.5f / script.lifetime;
+            float angle = (100 - coefficient * 20) / 360 * 2 * Mathf.PI * inst.angle;
             script.velocity = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
+        }
+
+        public override void Teleport(Vector3 NewPosition)
+        {
+            base.Teleport(NewPosition);
+            Physics.SyncTransforms();
         }
     }
 }

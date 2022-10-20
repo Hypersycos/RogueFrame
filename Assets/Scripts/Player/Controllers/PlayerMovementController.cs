@@ -146,7 +146,7 @@ namespace Hypersycos.RogueFrame
             inputForce += move.ReadValue<Vector2>().y * GetCameraForward(playerCamera) * moveForce * Time.fixedDeltaTime;
             float inputCap = move.ReadValue<Vector2>().magnitude * maxSpeed;
             inputForce *= IsGrounded() ? 1 : airStrafeRate;
-            if (horizontalVelocity.magnitude > float.Epsilon)
+            if (horizontalVelocity != Vector3.zero)
             {
                 //transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(inputForce, Vector3.up), Time.fixedDeltaTime / smoothing);
                 transform.rotation = Quaternion.LookRotation(horizontalVelocity, Vector3.up);
@@ -200,6 +200,7 @@ namespace Hypersycos.RogueFrame
             }
 
             characterController.Move(velocity * Time.fixedDeltaTime);
+
             if (!IsGrounded() && velocity.y == 0f)
             {
                 { //check if stairs
