@@ -7,11 +7,11 @@ using System.Collections.Generic;
 namespace Hypersycos.RogueFrame
 {
     [Serializable]
-    public abstract class StatusInstance : ICloneable
+    public abstract class StatusInstance
     {
         [field: SerializeField] public StatusEffect StatusEffect { get; protected set; }
         public float Amount;
-        public List<string> OneTimeEffects = new();
+        public HashSet<string> OneTimeEffects = new();
         public CharacterState owner { get; private set; } = null;
 
         public StatusInstance(float amount, CharacterState owner, StatusEffect statusEffect) : this(amount, statusEffect)
@@ -27,9 +27,10 @@ namespace Hypersycos.RogueFrame
 
         public StatusInstance() : this(0, null) { }
 
-        public StatusInstance CloneInstance()
+        public virtual StatusInstance CloneInstance()
         {
-            return (StatusInstance)Clone();
+            StatusInstance clone = (StatusInstance)MemberwiseClone();
+            return Clone(clone);
         }
 
         public void SetOwner(CharacterState Owner)
@@ -42,9 +43,10 @@ namespace Hypersycos.RogueFrame
         public abstract void Combine(StatusInstance other);
         public abstract void Refresh(StatusInstance other);
 
-        public object Clone()
+        public virtual StatusInstance Clone(StatusInstance clone)
         {
-            return MemberwiseClone();
+            clone.OneTimeEffects = new HashSet<string>(clone.OneTimeEffects);
+            return clone;
         }
 
         public abstract void Apply(CharacterState victim, Func<IEnumerator, Coroutine> Start);

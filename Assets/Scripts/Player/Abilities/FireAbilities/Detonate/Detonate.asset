@@ -36,6 +36,8 @@ MonoBehaviour:
       data:
         Effects:
         - {fileID: 11400000, guid: 1532d1f2c7661f14095f1698e8615e43, type: 2}
+        ResultDeterminer: {fileID: 11400000, guid: 8920278954063da48b7b1f9b7f4f17a1,
+          type: 2}
         MaxLength: 50
         Layers:
           serializedVersion: 2

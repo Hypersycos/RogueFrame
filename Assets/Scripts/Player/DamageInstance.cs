@@ -13,7 +13,7 @@ namespace Hypersycos.RogueFrame
         public StatTypeTarget ValidStatTypes;
         public CharacterState owner { get; private set; } = null;
         [SerializeField, ReadOnly] private float? _ActualAmount = null;
-        public List<string> OneTimeEffects = new();
+        public HashSet<string> OneTimeEffects = new();
         public float ActualAmount
         {
             get

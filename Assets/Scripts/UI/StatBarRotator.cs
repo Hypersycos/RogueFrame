@@ -6,17 +6,17 @@ namespace Hypersycos.RogueFrame
 {
     public class StatBarRotator : MonoBehaviour
     {
-        [SerializeField] Camera camera;
+        [SerializeField] Camera Camera;
         [SerializeField] Transform target;
         void Start()
         {
-            camera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+            Camera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         }
 
         // Update is called once per frame
         void Update()
         {
-            transform.LookAt(target.position + camera.transform.rotation * Vector3.forward, camera.transform.rotation * Vector3.up);
+            transform.LookAt(target.position + Camera.transform.rotation * Vector3.forward, Camera.transform.rotation * Vector3.up);
         }
     }
 }

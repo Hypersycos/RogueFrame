@@ -6,9 +6,10 @@ namespace Hypersycos.RogueFrame
 {
     public class SelfCast : ICastType
     {
-        public override TypeOfHit Cast(Vector3 cameraPosition, Quaternion lookDirection, CharacterState caster)
+        public override AbilityResult Cast(Vector3 cameraPosition, Quaternion lookDirection, CharacterState caster)
         {
-            return OnHit(caster, caster, caster.transform.position);
+            OnHit(caster, caster, caster.transform.position);
+            return ResultDeterminer.Feedback(TypeOfHit.NotApplicable, caster.gameObject);
         }
     }
 }

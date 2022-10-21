@@ -7,7 +7,7 @@ using static Hypersycos.RogueFrame.DefensePool;
 namespace Hypersycos.RogueFrame
 {
     [Serializable]
-    [CreateAssetMenu(fileName = "New Heal Effect", menuName = "Abilities/Heal Effect")]
+    [CreateAssetMenu(fileName = "New Heal Effect", menuName = "Abilities/Effects/Heal Effect")]
     public class HealEffect : ICastEffect
     {
         DamageInstance healInstance;
@@ -23,7 +23,7 @@ namespace Hypersycos.RogueFrame
             return;
         }
 
-        public override void Initialise(CharacterState owner)
+        public override void Initialise(CharacterState owner, IResultDeterminer resultDeterminer)
         {
             healInstance = new DamageInstance(false, Amount, owner, ValidTargets);
         }

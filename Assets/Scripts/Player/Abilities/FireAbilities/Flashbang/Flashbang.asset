@@ -35,5 +35,7 @@ MonoBehaviour:
       data:
         Effects:
         - {fileID: 11400000, guid: d4217f67c6f1c674bad741af4ea41638, type: 2}
+        ResultDeterminer: {fileID: 11400000, guid: fa5d3ef4cf4f269438aa30a708db5625,
+          type: 2}
         Projectile: {fileID: -1525363085425058124, guid: 94c0eff6e79ae20449aa4736a4c0121c,
           type: 3}

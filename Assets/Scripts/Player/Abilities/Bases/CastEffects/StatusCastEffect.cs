@@ -7,7 +7,7 @@ using static Hypersycos.RogueFrame.DefensePool;
 namespace Hypersycos.RogueFrame
 {
     [Serializable]
-    [CreateAssetMenu(fileName = "New Status Effect", menuName = "Abilities/Status Effect")]
+    [CreateAssetMenu(fileName = "New Status Effect", menuName = "Abilities/Effects/Status Effect")]
     public class StatusCastEffect : ICastEffect
     {
         [field: SerializeField] [field: SerializeReference] public StatusInstance statusEffect { get; private set; }
@@ -21,7 +21,7 @@ namespace Hypersycos.RogueFrame
             return;
         }
 
-        public override void Initialise(CharacterState owner)
+        public override void Initialise(CharacterState owner, IResultDeterminer resultDeterminer)
         {
             statusEffect = statusEffect.CloneInstance();
             statusEffect.SetOwner(owner);

@@ -20,7 +20,7 @@ namespace Hypersycos.RogueFrame
         IEnumerator FullHealAfter(float seconds)
         {
             yield return new WaitForSeconds(seconds);
-            Health.AddValue(10000);
+            Health.AddValue(10000000);
         }
 
         [SerializeField] DefenseStatInstance Health = new DefenseStatInstance(100);

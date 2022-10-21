@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Hypersycos.RogueFrame
 {
-    [CreateAssetMenu(fileName = "Fire Patch Effect", menuName = "Abilities/Fire/Fire Patch")]
+    [CreateAssetMenu(fileName = "Fire Patch Effect", menuName = "Abilities/Fire/Fire Patch Effect")]
     public class FirePatchEffect : SpawnEffect
     {
         public override void AffectObject(GameObject obj, Vector3 location)

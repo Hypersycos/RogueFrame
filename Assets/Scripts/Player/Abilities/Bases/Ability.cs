@@ -44,14 +44,24 @@ namespace Hypersycos.RogueFrame
         {
             foreach (ICastType castEffect in CastEffects)
             {
-                castEffect.Cast(cameraPosition, lookDirection, caster);
+                castEffect.BeforeCast();
+                AbilityResult result = castEffect.Cast(cameraPosition, lookDirection, caster);
+                foreach (IAbilityRequirement requirement in Requirements)
+                {
+                    requirement.Conditional(caster, result);
+                }
             }
         }
         public void DelayedCastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster)
         {
             foreach (ICastType castEffect in DelayedCastEffects)
             {
-                castEffect.Cast(cameraPosition, lookDirection, caster);
+                castEffect.BeforeCast();
+                AbilityResult result = castEffect.Cast(cameraPosition, lookDirection, caster);
+                foreach (IAbilityRequirement requirement in Requirements)
+                {
+                    requirement.Conditional(caster, result);
+                }
             }
         }
         public void QuickDrawIcon(Canvas container)

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Hypersycos.RogueFrame
 {
-    [Serializable]
+    [CreateAssetMenu(fileName = "Spawn Effect", menuName = "Abilities/Effects/Spawn Effect")]
     public class SpawnEffect : ICastEffect
     {
         [SerializeField] protected SpawnEffectObject ObjectSpawn;
@@ -60,7 +60,7 @@ namespace Hypersycos.RogueFrame
             }
         }
 
-        public override void Initialise(CharacterState owner)
+        public override void Initialise(CharacterState owner, IResultDeterminer resultDeterminer)
         {
             this.owner = owner;
         }

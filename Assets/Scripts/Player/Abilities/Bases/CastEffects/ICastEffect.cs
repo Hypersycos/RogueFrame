@@ -9,7 +9,7 @@ namespace Hypersycos.RogueFrame
     {
         public abstract void AffectCharacter(CharacterState characterState, Vector3 location);
         public abstract void AffectObject(GameObject obj, Vector3 location);
-        public abstract void Initialise(CharacterState owner);
+        public abstract void Initialise(CharacterState owner, IResultDeterminer resultDeterminer);
         public ICastEffect Clone()
         {
             return Instantiate(this);

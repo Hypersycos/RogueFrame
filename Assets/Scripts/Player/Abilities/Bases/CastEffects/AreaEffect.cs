@@ -4,13 +4,14 @@ using UnityEngine;
 
 namespace Hypersycos.RogueFrame
 {
-    [CreateAssetMenu(fileName = "New Area Effect", menuName = "Abilities/Area Effect")]
+    [CreateAssetMenu(fileName = "New Area Effect", menuName = "Abilities/Effects/Area Effect")]
     public class AreaEffect : ICastEffect
     {
         [SerializeField] protected float Range;
         [SerializeField] protected List<TypeOfHit> ValidHits;
         [SerializeField] protected LayerMask LayerMask;
         [SerializeField] protected List<ICastEffect> Effects;
+        protected IResultDeterminer ResultDeterminer;
         protected CharacterState Owner;
         public override void AffectCharacter(CharacterState characterState, Vector3 location)
         {
@@ -20,7 +21,8 @@ namespace Hypersycos.RogueFrame
 
         private void GetTargets(Vector3 location)
         {
-            foreach(Collider coll in Physics.OverlapSphere(location, Range, LayerMask))
+            Collider[] colliders = Physics.OverlapSphere(location, Range, LayerMask);
+            foreach (Collider coll in colliders)
             {
                 CharacterState state = coll.gameObject.GetComponent<CharacterState>();
                 if (state == null)
@@ -39,7 +41,7 @@ namespace Hypersycos.RogueFrame
             foreach(ICastEffect effect in Effects)
             {
                 ICastEffect clone = effect.Clone();
-                clone.Initialise(Owner);
+                clone.Initialise(Owner, ResultDeterminer);
                 clone.AffectCharacter(state, state.transform.position);
             }
         }
@@ -48,7 +50,7 @@ namespace Hypersycos.RogueFrame
             foreach (ICastEffect effect in Effects)
             {
                 ICastEffect clone = effect.Clone();
-                clone.Initialise(Owner);
+                clone.Initialise(Owner, ResultDeterminer);
                 clone.AffectObject(obj, obj.transform.position);
             }
         }
@@ -67,9 +69,10 @@ namespace Hypersycos.RogueFrame
             }
         }
 
-        public override void Initialise(CharacterState owner)
+        public override void Initialise(CharacterState owner, IResultDeterminer resultDeterminer)
         {
             Owner = owner;
+            ResultDeterminer = resultDeterminer;
         }
     }
 }

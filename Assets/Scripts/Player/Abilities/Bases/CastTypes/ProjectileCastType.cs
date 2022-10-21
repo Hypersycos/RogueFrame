@@ -9,14 +9,14 @@ namespace Hypersycos.RogueFrame
     {
         [SerializeField] private ProjectileScript Projectile;
 
-        public override TypeOfHit Cast(Vector3 cameraPosition, Quaternion lookDirection, CharacterState caster)
+        public override AbilityResult Cast(Vector3 cameraPosition, Quaternion lookDirection, CharacterState caster)
         {
             ProjectileScript spawned = Object.Instantiate(Projectile, cameraPosition, lookDirection);
             spawned.enabled = false;
             spawned.Initialise((target, location) => OnHit(target, caster, location), (target, location) => OnHit(target, caster, location));
             spawned.GetComponent<NetworkObject>().Spawn();
             spawned.enabled = true;
-            return TypeOfHit.NotApplicable;
+            return ResultDeterminer.Feedback(TypeOfHit.NotApplicable, null);
         }
     }
 }

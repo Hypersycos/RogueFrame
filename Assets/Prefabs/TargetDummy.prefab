@@ -2304,14 +2304,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Team: 0
+  BeforeStatusAdded:
+    m_PersistentCalls:
+      m_Calls: []
+  AfterStatusAdded:
+    m_PersistentCalls:
+      m_Calls: []
+  BeforeStatusRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  AfterStatusRemoved:
+    m_PersistentCalls:
+      m_Calls: []
   Health:
     <StatType>k__BackingField: {fileID: 11400000, guid: 4d08cedfe6dbc144e873a312b724f912,
       type: 2}
-    <Value>k__BackingField: 200
+    <Value>k__BackingField: 80000
     <MinValue>k__BackingField: 0
-    <MaxValue>k__BackingField: 200
+    <MaxValue>k__BackingField: 80000
     <MinMaxValue>k__BackingField: 0
-    <BaseMax>k__BackingField: 200
+    <BaseMax>k__BackingField: 80000
     <ReductionStat>k__BackingField:
       <StatType>k__BackingField: {fileID: 0}
       <Value>k__BackingField: 50
@@ -2503,7 +2515,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -2559,7 +2571,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e82d6a7017a1ab4f96b5d04e1ad3701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  camera: {fileID: 0}
+  Camera: {fileID: 0}
   target: {fileID: 4626060983231779873}
 --- !u!1 &8874849945911858211
 GameObject:
@@ -2714,6 +2726,11 @@ PrefabInstance:
         type: 3}
       propertyPath: StatInstances.Array.size
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7449445035334848817, guid: 168f8a997aaf8d34abf37b6191ea435f,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 82.3
       objectReference: {fileID: 0}
     - target: {fileID: 8483677306457641752, guid: 168f8a997aaf8d34abf37b6191ea435f,
         type: 3}
