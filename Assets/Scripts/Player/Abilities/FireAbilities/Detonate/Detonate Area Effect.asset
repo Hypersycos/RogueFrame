@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c6affc7458ac3b448ec760d0a048a82, type: 3}
   m_Name: Detonate Area Effect
   m_EditorClassIdentifier: 
-  Range: 0
-  ValidHits: 
+  Range: 8
+  ValidHits: 0000000001000000
   LayerMask:
     serializedVersion: 2
-    m_Bits: 0
-  Effects: []
+    m_Bits: 256
+  Effects:
+  - {fileID: 11400000, guid: 1f52deb1ea6e2f544980ee23f07c80f8, type: 2}

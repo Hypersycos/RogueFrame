@@ -41,7 +41,7 @@ namespace Hypersycos.RogueFrame
             }
         }
         public class CharacterStateHealthEvent : UnityEvent<CharacterState, DamageInstance> { }
-        public class CharacterStateStatusEvent : UnityEvent<CharacterState, StatusInstance> { }
+        [System.Serializable] public class CharacterStateStatusEvent : UnityEvent<CharacterState, StatusInstance> { }
 
         readonly Dictionary<StatusEffect, List<StatusInstance>> statusInstances = new();
         public int Team;

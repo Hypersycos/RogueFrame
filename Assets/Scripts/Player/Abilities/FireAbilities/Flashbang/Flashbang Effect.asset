@@ -13,9 +13,15 @@ MonoBehaviour:
   m_Name: Flashbang Effect
   m_EditorClassIdentifier: 
   <statusEffect>k__BackingField:
-    rid: -2
+    rid: 1155016549767315473
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 1155016549767315473
+      type: {class: BlindStatusInstance, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
+      data:
+        <StatusEffect>k__BackingField: {fileID: 11400000, guid: 19e66c4b155537f428447c83da2730d3,
+          type: 2}
+        Amount: 0
+        OneTimeEffects: []
+        duration: 2

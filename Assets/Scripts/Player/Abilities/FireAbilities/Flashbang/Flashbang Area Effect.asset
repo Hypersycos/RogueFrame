@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c6affc7458ac3b448ec760d0a048a82, type: 3}
   m_Name: Flashbang Area Effect
   m_EditorClassIdentifier: 
-  Range: 0
-  ValidHits: 
+  Range: 12
+  ValidHits: 000000000100000002000000
   LayerMask:
     serializedVersion: 2
-    m_Bits: 0
-  Effects: []
+    m_Bits: 256
+  Effects:
+  - {fileID: 11400000, guid: 2b4c5ed748697f44ba6f7482d03934d3, type: 2}

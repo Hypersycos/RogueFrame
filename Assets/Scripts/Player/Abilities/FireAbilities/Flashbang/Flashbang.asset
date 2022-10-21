@@ -34,6 +34,6 @@ MonoBehaviour:
       type: {class: ProjectileCastType, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
       data:
         Effects:
-        - {fileID: 11400000, guid: 2b4c5ed748697f44ba6f7482d03934d3, type: 2}
+        - {fileID: 11400000, guid: d4217f67c6f1c674bad741af4ea41638, type: 2}
         Projectile: {fileID: -1525363085425058124, guid: 94c0eff6e79ae20449aa4736a4c0121c,
           type: 3}

@@ -9,6 +9,7 @@ namespace Hypersycos.RogueFrame
         bool CanCast(PlayerState state);
         bool Charge(PlayerState state);
         void Refund(PlayerState state);
+        //TODO: Conditional not implemented
         void Conditional(PlayerState state, AbilityResult result);
     }
 

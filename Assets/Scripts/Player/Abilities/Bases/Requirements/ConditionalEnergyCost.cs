@@ -10,12 +10,17 @@ namespace Hypersycos.RogueFrame
     {
         [field: SerializeField] public int Energy { get; private set; }
         [field: SerializeField] public List<TypeOfHit> ValidHits { get; private set; } = new();
+        private bool HasBeenCharged;
         public bool CanCast(PlayerState state)
         {
             return state.CanUseEnergy(Energy);
         }
 
-        public bool Charge(PlayerState state) { return CanCast(state); }
+        public bool Charge(PlayerState state)
+        {
+            HasBeenCharged = false;
+            return CanCast(state);
+        }
 
         public void Refund(PlayerState state)
         {
@@ -24,9 +29,10 @@ namespace Hypersycos.RogueFrame
 
         public void Conditional(PlayerState state, AbilityResult result)
         {
-            if (ValidHits.Contains(result.typeOfHit))
+            if (!HasBeenCharged && ValidHits.Contains(result.typeOfHit))
             {
                 state.UseEnergy(Energy);
+                HasBeenCharged=true;
             }
         }
 

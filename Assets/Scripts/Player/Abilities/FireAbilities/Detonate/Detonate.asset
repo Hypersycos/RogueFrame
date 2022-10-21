@@ -35,7 +35,7 @@ MonoBehaviour:
       type: {class: HitscanCastType, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
       data:
         Effects:
-        - {fileID: 11400000, guid: 1f52deb1ea6e2f544980ee23f07c80f8, type: 2}
+        - {fileID: 11400000, guid: 1532d1f2c7661f14095f1698e8615e43, type: 2}
         MaxLength: 50
         Layers:
           serializedVersion: 2
