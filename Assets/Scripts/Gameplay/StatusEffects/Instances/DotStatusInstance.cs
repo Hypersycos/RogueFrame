@@ -23,6 +23,13 @@ namespace Hypersycos.RogueFrame
             TickDelay = tickDelay;
             ValidStatTypes = validTargets;
         }
+
+        public DotStatusInstance(float tickDelay, StatTypeTarget validTargets) : base()
+        {
+            TickDelay = tickDelay;
+            ValidStatTypes = validTargets;
+        }
+        public DotStatusInstance() : base() { }
         public override void Apply(CharacterState victim, Func<IEnumerator, Coroutine> Start)
         {
             DoT = new StatRegenerationModifier(StatModifier.StackType.Flat, null, -Amount, owner, 1 / TickDelay);

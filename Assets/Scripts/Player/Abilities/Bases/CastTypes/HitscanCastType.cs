@@ -9,7 +9,7 @@ namespace Hypersycos.RogueFrame
         [SerializeField] float MaxLength;
         [SerializeField] LayerMask Layers;
         [SerializeField] QueryTriggerInteraction HitTriggers;
-        public override void Cast(Vector3 cameraPosition, Quaternion lookDirection, CharacterState caster)
+        public override TypeOfHit Cast(Vector3 cameraPosition, Quaternion lookDirection, CharacterState caster)
         {
             RaycastHit hit;
             bool success;
@@ -18,7 +18,11 @@ namespace Hypersycos.RogueFrame
             if (success)
             {
                 CharacterState target = hit.collider.GetComponent<CharacterState>();
-                OnHit(target, hit.collider.gameObject, caster, hit.point);
+                return OnHit(target, hit.collider.gameObject, caster, hit.point);
+            }
+            else
+            {
+                return OnHit(null, null, caster, cameraPosition + lookDirection * new Vector3(0,0,1) * MaxLength);
             }
         }
     }

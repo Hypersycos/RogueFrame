@@ -53,7 +53,7 @@ namespace Hypersycos.RogueFrame
             if (enemy == null)
             {
                 OnHitObj(other.gameObject, transform.position);
-                if (!CanPunchthroughTerrain) Expire();
+                if (!CanPunchthroughTerrain) Delete();
                 TerrainHits++;
             }
             else if (!alreadyHit.Contains(enemy))
@@ -62,13 +62,13 @@ namespace Hypersycos.RogueFrame
                 if (CanPunchthroughEnemies)
                     alreadyHit.Add(enemy);
                 else
-                    Expire();
+                    Delete();
                 EnemyHits++;
             }
             Hits++;
-            if (MaxHits > 0 && Hits >= MaxHits) Expire();
-            if (MaxTerrainHits > 0 && TerrainHits >= MaxTerrainHits) Expire();
-            if (MaxEnemyHits > 0 && EnemyHits >= MaxEnemyHits) Expire();
+            if (MaxHits > 0 && Hits >= MaxHits) Delete();
+            if (MaxTerrainHits > 0 && TerrainHits >= MaxTerrainHits) Delete();
+            if (MaxEnemyHits > 0 && EnemyHits >= MaxEnemyHits) Delete();
         }
 
         private void OnCollisionExit(Collision collision)
@@ -127,6 +127,7 @@ namespace Hypersycos.RogueFrame
 
         public void Expire()
         {
+            OnHitObj(null, transform.position);
             Destroy(gameObject);
         }
     }

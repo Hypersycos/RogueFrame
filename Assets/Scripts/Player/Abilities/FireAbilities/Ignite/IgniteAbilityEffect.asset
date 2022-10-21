@@ -23,6 +23,7 @@ MonoBehaviour:
         <StatusEffect>k__BackingField: {fileID: 11400000, guid: c55e9d979207e5c42958a9b9dbda9ce3,
           type: 2}
         Amount: 0
+        OneTimeEffects: []
         Heat: {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
         Strength: 1
         Duration: 1

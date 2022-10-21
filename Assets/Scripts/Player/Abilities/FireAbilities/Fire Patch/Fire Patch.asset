@@ -16,7 +16,7 @@ MonoBehaviour:
   <Description>k__BackingField: 
   NeedsRedraw: 0
   Requirements:
-  - rid: 1155016517560565782
+  - rid: 1155016549767315456
   CastEffects:
   - rid: 1155016517560565783
   DelayedCastEffects: []
@@ -26,10 +26,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 1155016517560565782
-      type: {class: EnergyCost, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
-      data:
-        <Energy>k__BackingField: 40
     - rid: 1155016517560565783
       type: {class: HitscanCastType, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
       data:
@@ -40,3 +36,8 @@ MonoBehaviour:
           serializedVersion: 2
           m_Bits: 1
         HitTriggers: 1
+    - rid: 1155016549767315456
+      type: {class: ConditionalEnergyCost, ns: Hypersycos.RogueFrame, asm: Assembly-CSharp}
+      data:
+        <Energy>k__BackingField: 50
+        <ValidHits>k__BackingField: 01000000

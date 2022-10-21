@@ -9,10 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a6da0669e706d4439b63b9237771116, type: 3}
-  m_Name: IgniteEffect
+  m_Script: {fileID: 11500000, guid: e98f042ecf80ea04995eda131c4a07d1, type: 3}
+  m_Name: Detonate Effect
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: Ignite
-  <Description>k__BackingField: All incoming damage causes a Heat Status Effect
-  <StackType>k__BackingField: 5
-  <DefaultDuration>k__BackingField: 1
+  Range: 10
+  ValidHits: 0000000001000000
+  LayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  Heat: {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
+  ExplosionRange: 4

@@ -9,10 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a6da0669e706d4439b63b9237771116, type: 3}
-  m_Name: IgniteEffect
+  m_Script: {fileID: 11500000, guid: d400d31e1e39a894b87c35993944fbd8, type: 3}
+  m_Name: Flashbang Effect
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: Ignite
-  <Description>k__BackingField: All incoming damage causes a Heat Status Effect
-  <StackType>k__BackingField: 5
-  <DefaultDuration>k__BackingField: 1
+  <statusEffect>k__BackingField:
+    rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

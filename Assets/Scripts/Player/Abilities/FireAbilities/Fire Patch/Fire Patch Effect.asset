@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ObjectSpawn: {fileID: 2325073028489156595, guid: a1ff330a5ebdb314599b2cb28d2603c4,
     type: 3}
-  PlayerSpawn: {fileID: 2325073028489156595, guid: a1ff330a5ebdb314599b2cb28d2603c4,
-    type: 3}
+  PlayerSpawn: {fileID: 0}
   ParentToCharacter: 0
   SpawnBelowCharacter: 1
   LocationSpawn: {fileID: 0}

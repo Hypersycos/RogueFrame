@@ -74,6 +74,18 @@ namespace Hypersycos.RogueFrame
         {
             return statusInstances.ContainsKey(statusEffect) ? statusInstances[statusEffect].Count : 0;
         }
+
+        public List<StatusInstance> GetStatusInstances(StatusEffect statusEffect)
+        {
+            if (statusInstances.ContainsKey(statusEffect))
+            {
+                return new List<StatusInstance>(statusInstances[statusEffect]);
+            }
+            else
+            {
+                return null;
+            }
+        }
         public void AddStatus(StatusInstance instance)
         {
             BeforeStatusAdded.Invoke(this, instance);
@@ -135,6 +147,10 @@ namespace Hypersycos.RogueFrame
             BeforeStatusRemoved.Invoke(this, instance);
             List<StatusInstance> insts = statusInstances[instance.StatusEffect];
             insts.Remove(instance);
+            if (insts.Count == 0)
+            {
+                statusInstances.Remove(instance.StatusEffect);
+            }
             UnapplyStatus(instance);
             AfterStatusRemoved.Invoke(this, instance);
         }

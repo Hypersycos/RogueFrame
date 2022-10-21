@@ -44,7 +44,7 @@ namespace Hypersycos.RogueFrame
             }
 
             GenericMenu menu = new GenericMenu();
-            var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes()).Where(t => t.GetInterfaces().Contains(typeof(T)) || t.IsSubclassOf(typeof(T)));
+            var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes()).Where(t => t.GetInterfaces().Contains(typeof(T)) || t.IsSubclassOf(typeof(T)) && !t.IsAbstract);
             foreach (var type in types)
             {
                 menu.AddItem(new GUIContent(type.Name), false, handleItemClicked, type);

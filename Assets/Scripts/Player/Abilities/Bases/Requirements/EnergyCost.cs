@@ -23,6 +23,8 @@ namespace Hypersycos.RogueFrame
             state.GiveEnergy(Energy);
         }
 
+        void IAbilityRequirement.Conditional(PlayerState state, AbilityResult result) { }
+
         public EnergyCost() : this(0) { }
         public EnergyCost(int energy)
         {

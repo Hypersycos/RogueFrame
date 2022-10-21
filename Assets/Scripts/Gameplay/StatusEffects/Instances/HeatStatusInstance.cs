@@ -15,5 +15,6 @@ namespace Hypersycos.RogueFrame
             : base(amount, statusEffect, duration, 1, StatTypeTarget.AllValid)
         {
         }
+        public HeatStatusInstance() : base(1, StatTypeTarget.AllValid) { }
     }
 }

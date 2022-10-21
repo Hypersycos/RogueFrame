@@ -18,9 +18,9 @@ namespace Hypersycos.RogueFrame
             }
             return clone;
         }
-        public abstract void Cast(Vector3 cameraPosition, Quaternion lookDirection, CharacterState caster);
+        public abstract TypeOfHit Cast(Vector3 cameraPosition, Quaternion lookDirection, CharacterState caster);
 
-        public void OnHit(CharacterState target, CharacterState owner, Vector3 location)
+        public TypeOfHit OnHit(CharacterState target, CharacterState owner, Vector3 location)
         {
             foreach (ICastEffect effect in Effects)
             {
@@ -28,9 +28,10 @@ namespace Hypersycos.RogueFrame
                 clone.Initialise(owner);
                 clone.AffectCharacter(target, location);
             }
+            return TypeOfHit.CharacterHit;
         }
 
-        public void OnHit(GameObject hit, CharacterState owner, Vector3 location)
+        public TypeOfHit OnHit(GameObject hit, CharacterState owner, Vector3 location)
         {
             foreach (ICastEffect effect in Effects)
             {
@@ -38,17 +39,25 @@ namespace Hypersycos.RogueFrame
                 clone.Initialise(owner);
                 clone.AffectObject(hit, location);
             }
-        }
-
-        public void OnHit(CharacterState character, GameObject hit, CharacterState owner, Vector3 location)
-        {
-            if (character == null)
+            if (hit == null)
             {
-                OnHit(hit, owner, location);
+                return TypeOfHit.NoHit;
             }
             else
             {
-                OnHit(character, owner, location);
+                return TypeOfHit.ObjectHit;
+            }
+        }
+
+        public TypeOfHit OnHit(CharacterState character, GameObject hit, CharacterState owner, Vector3 location)
+        {
+            if (character == null)
+            {
+                return OnHit(hit, owner, location);
+            }
+            else
+            {
+                return OnHit(character, owner, location);
             }
         }
     }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Hypersycos.RogueFrame
 {
-    public class IAuraAbility : MonoBehaviour
+    public class StatusAreaEffect : MonoBehaviour
     {
         // Start is called before the first frame update
         void Start()
