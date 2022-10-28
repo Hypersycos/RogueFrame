@@ -125,7 +125,7 @@ namespace Hypersycos.RogueFrame
             Destroy(gameObject);
         }
 
-        public void Expire()
+        public virtual void Expire()
         {
             OnHitObj(null, transform.position);
             Destroy(gameObject);

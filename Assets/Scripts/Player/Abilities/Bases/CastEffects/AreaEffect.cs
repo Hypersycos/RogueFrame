@@ -42,7 +42,7 @@ namespace Hypersycos.RogueFrame
             {
                 ICastEffect clone = effect.Clone();
                 clone.Initialise(Owner, ResultDeterminer);
-                clone.AffectCharacter(state, state.transform.position);
+                clone.AffectCharacter(state, state.GetComponent<Collider>().bounds.center);
             }
         }
         public virtual void ObjectEffect(GameObject obj)

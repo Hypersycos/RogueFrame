@@ -11,6 +11,7 @@ namespace Hypersycos.RogueFrame
         [SerializeField] StatusEffect Heat;
         [SerializeField] float ExplosionRange;
         [SerializeField] LayerMask LayerMask;
+        [SerializeField] SpawnEffect VisualEffect;
         HitCountDeterminer ResultDeterminer;
         CharacterState Owner;
         string debounceString;
@@ -49,6 +50,7 @@ namespace Hypersycos.RogueFrame
                     victimState.ApplyDamageInstance(inst);
                 }
             }
+            VisualEffect.AffectCharacter(state, location);
         }
 
         public override void AffectObject(GameObject obj, Vector3 location)

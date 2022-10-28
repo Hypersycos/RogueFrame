@@ -2303,6 +2303,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20839f44ed6cce94c85f8747c249a6a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _SyncedInstances: []
   Team: 0
   BeforeStatusAdded:
     m_PersistentCalls:
@@ -2330,6 +2331,9 @@ MonoBehaviour:
       <BaseValue>k__BackingField: 50
       <Bound>k__BackingField: 0
     <IsOverhealth>k__BackingField: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &7862025110262846133
 GameObject:
   m_ObjectHideFlags: 0
