@@ -1,5 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using static Hypersycos.RogueFrame.BoundedStatInstance;
@@ -7,7 +10,7 @@ using static Hypersycos.RogueFrame.BoundedStatInstance;
 namespace Hypersycos.RogueFrame
 {
     [System.Serializable]
-    public class SemiBoundedStatInstance : StatInstance
+    public class SemiBoundedStatInstance : StatInstance, ISync
     {
         public class SemiBoundedStatEvent : UnityEvent<SemiBoundedStatInstance, float> { }
         [field: SerializeField] public StatType StatType { get; protected set; }
@@ -50,6 +53,16 @@ namespace Hypersycos.RogueFrame
         {
             base.RemoveModifier(modifier);
             Recalculate();
+        }
+
+        public void StartSync(Action<int, SyncChange> syncFunc, int index)
+        {
+            OnChange.AddListener((_, change) => syncFunc(index, new SyncChange(true, change)));
+        }
+
+        public void ApplySync(SyncChange change)
+        {
+            Value += change.Change;
         }
     }
 }

@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static Hypersycos.RogueFrame.DefensePool;
-using static UnityEditor.FilePathAttribute;
-using static UnityEngine.UI.GridLayoutGroup;
 
 namespace Hypersycos.RogueFrame
 {

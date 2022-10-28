@@ -2319,11 +2319,11 @@ MonoBehaviour:
   Health:
     <StatType>k__BackingField: {fileID: 11400000, guid: 4d08cedfe6dbc144e873a312b724f912,
       type: 2}
-    <Value>k__BackingField: 80000
+    <Value>k__BackingField: 200
     <MinValue>k__BackingField: 0
-    <MaxValue>k__BackingField: 80000
+    <MaxValue>k__BackingField: 200
     <MinMaxValue>k__BackingField: 0
-    <BaseMax>k__BackingField: 80000
+    <BaseMax>k__BackingField: 200
     <ReductionStat>k__BackingField:
       <StatType>k__BackingField: {fileID: 0}
       <Value>k__BackingField: 50

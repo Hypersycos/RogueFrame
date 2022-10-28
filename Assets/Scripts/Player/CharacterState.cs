@@ -8,10 +8,13 @@ namespace Hypersycos.RogueFrame
 {
     public abstract class CharacterState : NetworkBehaviour
     {
-        void Start()
+        protected void StartSync()
         {
-            DefenseStatInstance Health = new DefenseStatInstance(100);
-            HitPoints = new DefensePool(new List<DefenseStatInstance>() { Health}, this);
+            for(int i = 0; i < SyncedInstances.Count; i++)
+            {
+                ISync inst = SyncedInstances[i];
+                inst.StartSync(SyncStat, i);
+            }
         }
 
         protected virtual void FixedUpdate()
@@ -38,6 +41,17 @@ namespace Hypersycos.RogueFrame
             foreach(StatusInstance inst in ToRemove)
             {
                 RemoveStatus(inst);
+            }
+        }
+
+        [SerializeField] [field: SerializeReference] private List<ISync> _SyncedInstances = new();
+        protected List<ISync> SyncedInstances
+        {
+            get { return _SyncedInstances; }
+            set
+            {
+                _SyncedInstances = value;
+                if (IsServer) StartSync();
             }
         }
         public class CharacterStateHealthEvent : UnityEvent<CharacterState, DamageInstance> { }
@@ -69,6 +83,18 @@ namespace Hypersycos.RogueFrame
         public CharacterStateStatusEvent AfterStatusAdded = new();
         public CharacterStateStatusEvent BeforeStatusRemoved = new();
         public CharacterStateStatusEvent AfterStatusRemoved = new();
+
+        protected virtual void SyncStat(int index, SyncChange data)
+        {
+            SyncStatClientRpc(index, data);
+        }
+
+        [ClientRpc]
+        protected void SyncStatClientRpc(int index, SyncChange data, ClientRpcParams clientRpcParams = default)
+        {
+            if (IsServer) return;
+            SyncedInstances[index].ApplySync(data);
+        }
 
         public int GetStatusCount(StatusEffect statusEffect)
         {

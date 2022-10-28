@@ -1,12 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace Hypersycos.RogueFrame
 {
     [System.Serializable]
-    public class BoundedStatInstance : StatInstance
+    public class BoundedStatInstance : StatInstance, ISync
     {
         [field: SerializeField] public StatType StatType { get; protected set; }
         public class BoundedStatEvent : UnityEvent<BoundedStatInstance, float> { }
@@ -111,30 +114,36 @@ namespace Hypersycos.RogueFrame
             if (Amount > 0)
             {
                 float CappedAmount = Mathf.Min(Amount, MaxValue - Value);
-                Value += CappedAmount;
-                if (Value == MaxValue)
+                if (CappedAmount != 0)
                 {
-                    OnFill.Invoke(this, CappedAmount, Amount);
-                    Amount = CappedAmount;
-                }
-                else
-                {
-                    OnIncrease.Invoke(this, Amount);
+                    Value += CappedAmount;
+                    if (Value == MaxValue)
+                    {
+                        OnFill.Invoke(this, CappedAmount, Amount);
+                        Amount = CappedAmount;
+                    }
+                    else
+                    {
+                        OnIncrease.Invoke(this, Amount);
+                    }
                 }
                 InterruptDOTs();
             }
             else if (Amount < 0)
             {
                 float CappedAmount = Mathf.Max(Amount, MinValue - Value);
-                Value += CappedAmount;
-                if (Value == MinValue)
+                if (CappedAmount != 0)
                 {
-                    OnEmpty.Invoke(this, CappedAmount, Amount);
-                    Amount = CappedAmount;
-                }
-                else
-                {
-                    OnDecrease.Invoke(this, Amount);
+                    Value += CappedAmount;
+                    if (Value == MinValue)
+                    {
+                        OnEmpty.Invoke(this, CappedAmount, Amount);
+                        Amount = CappedAmount;
+                    }
+                    else
+                    {
+                        OnDecrease.Invoke(this, Amount);
+                    }
                 }
                 InterruptHOTs();
             }
@@ -270,6 +279,46 @@ namespace Hypersycos.RogueFrame
                     break;
                 default:
                     throw new System.Exception("Attempt to remove invalid modifier from bounded stat");
+            }
+        }
+
+        protected void ClientSetMax(float change)
+        {
+            MaxValue += change;
+            if (change > 0)
+            {
+                OnMaxIncrease.Invoke(this, change);
+            }
+            else
+            {
+                OnMaxDecrease.Invoke(this, change);
+            }
+        }
+
+        protected void ClientSetValue(float change)
+        {
+            ApplyChange(change);
+        }
+
+        public void StartSync(Action<int, SyncChange> syncFunc, int index)
+        {
+            OnDecrease.AddListener((_, change) => syncFunc(index, new SyncChange(true, change)));
+            OnIncrease.AddListener((_, change) => syncFunc(index, new SyncChange(true, change)));
+            OnEmpty.AddListener((_, change, _) => syncFunc(index, new SyncChange(true, change)));
+            OnFill.AddListener((_, change, _) => syncFunc(index, new SyncChange(true, change)));
+            OnMaxDecrease.AddListener((_, change) => syncFunc(index, new SyncChange(false, change)));
+            OnMaxIncrease.AddListener((_, change) => syncFunc(index, new SyncChange(false, change)));
+        }
+
+        public void ApplySync(SyncChange change)
+        {
+            if (change.IsValueChange)
+            {
+                ClientSetValue(change.Change);
+            }
+            else
+            {
+                ClientSetMax(change.Change);
             }
         }
     }

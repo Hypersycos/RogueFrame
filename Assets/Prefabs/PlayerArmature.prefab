@@ -829,6 +829,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Team: 0
+  BeforeStatusAdded:
+    m_PersistentCalls:
+      m_Calls: []
+  AfterStatusAdded:
+    m_PersistentCalls:
+      m_Calls: []
+  BeforeStatusRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  AfterStatusRemoved:
+    m_PersistentCalls:
+      m_Calls: []
   DamageTickPrefab: {fileID: 6979534173382537496, guid: 0a2763b73bfcf3544a980cc3dc0a6d36,
     type: 3}
   Energy:

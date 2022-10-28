@@ -13,6 +13,7 @@ namespace Hypersycos.RogueFrame
             {
                 Health.OnEmpty.AddListener((_, _, _) => StartCoroutine(FullHealAfter(3)));
             }
+            SyncedInstances = new List<ISync> { Health };
             HitPoints = new DefensePool(new List<DefenseStatInstance>() { Health }, this);
             GetComponentInChildren<StatBarScript>().AddStats(new List<BoundedStatInstance>() { Health });
         }

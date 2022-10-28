@@ -58,7 +58,7 @@ namespace Hypersycos.RogueFrame
                 };
             }
             HitPoints = new DefensePool(new List<DefenseStatInstance>() { Health, Shields, OverHealth }, this);
-
+            SyncedInstances = new List<ISync> { Energy, Health, Shields, OverHealth };
             if (IsOwner)
             {
                 GameObject.FindWithTag("HealthBar").GetComponent<StatBarScript>().AddStats(new List<BoundedStatInstance>() { Health, Shields, OverHealth });

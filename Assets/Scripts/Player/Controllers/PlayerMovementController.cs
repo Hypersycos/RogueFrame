@@ -314,21 +314,27 @@ namespace Hypersycos.RogueFrame
 
         private void OnFootstep(AnimationEvent animationEvent)
         {
-            if (animationEvent.animatorClipInfo.weight > 0.5f)
+            if (IsOwner)
             {
-                if (FootstepAudioClips.Length > 0)
+                if (animationEvent.animatorClipInfo.weight > 0.5f)
                 {
-                    var index = UnityEngine.Random.Range(0, FootstepAudioClips.Length);
-                    AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(characterController.center), FootstepAudioVolume);
+                    if (FootstepAudioClips.Length > 0)
+                    {
+                        var index = UnityEngine.Random.Range(0, FootstepAudioClips.Length);
+                        AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(characterController.center), FootstepAudioVolume);
+                    }
                 }
             }
         }
 
         private void OnLand(AnimationEvent animationEvent)
         {
-            if (animationEvent.animatorClipInfo.weight > 0.5f)
+            if (IsOwner)
             {
-                AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(characterController.center), FootstepAudioVolume);
+                if (animationEvent.animatorClipInfo.weight > 0.5f)
+                {
+                    AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(characterController.center), FootstepAudioVolume);
+                }
             }
         }
     }
