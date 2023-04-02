@@ -23,7 +23,7 @@ namespace Hypersycos.RogueFrame
         {
             public int Compare(StatModifier x, StatModifier y)
             {
-                return y.Value.CompareTo(x.Value);
+                return Mathf.Abs(y.Value).CompareTo(Mathf.Abs(x.Value));
             }
         }
 
@@ -43,7 +43,7 @@ namespace Hypersycos.RogueFrame
                     int index = modifiers.BinarySearch(modifier, new ByStrength());
                     index = index < 0 ? ~index : index;
                     if (index == 0)
-                    {
+                    { //if strongest, replace current active instance with new instance
                         int oldIndex = StatModifiers.BinarySearch(modifiers[0], new ByPriority());
                         StatModifiers.RemoveAt(oldIndex);
                         StatModifiers.Insert(oldIndex, modifier);

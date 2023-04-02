@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1e7c714a1a44644f9884e5e42b9693c, type: 3}
   m_Name: Detonate Visual Effect
   m_EditorClassIdentifier: 
-  ObjectSpawn: {fileID: 0}
-  PlayerSpawn: {fileID: 0}
-  ParentToCharacter: 0
+  ObjectSpawn: {fileID: -41611334040234606, guid: f6cb870d6675fe74b9c4fca27b4181ee,
+    type: 3}
+  PlayerSpawn: {fileID: -41611334040234606, guid: f6cb870d6675fe74b9c4fca27b4181ee,
+    type: 3}
+  ParentToCharacter: 1
   SpawnBelowCharacter: 0
-  LocationSpawn: {fileID: 0}
+  LocationSpawn: {fileID: -41611334040234606, guid: f6cb870d6675fe74b9c4fca27b4181ee,
+    type: 3}

@@ -17,12 +17,12 @@ namespace Hypersycos.RogueFrame
         private ushort currentAbility = 0;
         private ushort lastCastAbility = 0;
         private Quaternion? lastCastRotation = null;
+        private Vector3? lastCastOffset = null;
         private double clientCastLockout = 0;
         private double serverCastLockout = 0;
         [SerializeField] private List<Ability> abilities = new();
         [SerializeField] private PlayerState playerState;
         private float castSpeed = 1; //TODO: replace with generic stat
-        [SerializeField] private Vector3 cameraOffset = new Vector3(0.7f, 0, -1);
         public override void OnNetworkSpawn()
         {
             if (IsLocalPlayer)
@@ -59,7 +59,7 @@ namespace Hypersycos.RogueFrame
             if (clientCastLockout >= 0 && clientCastLockout < NetworkManager.ServerTime.Time)
             {
                 clientCastLockout = -1;
-                CastServerRpc(currentAbility, camera.rotation);
+                CastServerRpc(currentAbility, camera.rotation, camera.position - cameraRoot.position);
                 Ability selected = abilities[currentAbility];
                 lastCastAbility = currentAbility;
                 if (selected.CastTime > 0)
@@ -86,7 +86,7 @@ namespace Hypersycos.RogueFrame
         }
 
         [ServerRpc]
-        private void CastServerRpc(ushort abilityIndex, Quaternion lookDirection)
+        private void CastServerRpc(ushort abilityIndex, Quaternion lookDirection, Vector3 cameraOffset)
         {
             if (serverCastLockout >= 0 && serverCastLockout < NetworkManager.ServerTime.Time)
             {
@@ -101,16 +101,20 @@ namespace Hypersycos.RogueFrame
                 CastResultClientRpc(serverCastLockout, -1);
                 return;
             }
+
+            lastCastOffset = null;
+            lastCastRotation = null;
+
             Ability ability = abilities[abilityIndex];
             if (ability.CastCost(playerState))
             {
-                Vector3 cameraPosition = cameraRoot.position + lookDirection * cameraOffset;
+                Vector3 cameraPosition = cameraRoot.position + cameraOffset;
                 ability.CastEffect(cameraPosition, lookDirection, playerState);
                 serverCastLockout = NetworkManager.ServerTime.Time + ability.AnimationTime;
                 CastResultClientRpc(serverCastLockout, ability.CastTime);
                 if (ability.CastTime > 0)
                 {
-                    StartCoroutine(ServerDelayedCast(NetworkManager.ServerTime.Time + ability.CastTime, lookDirection));
+                    StartCoroutine(ServerDelayedCast(NetworkManager.ServerTime.Time + ability.CastTime, lookDirection, cameraOffset));
                 }
                 lastCastAbility = abilityIndex;
             }
@@ -127,7 +131,7 @@ namespace Hypersycos.RogueFrame
             lastCastRotation = lookDirection;
         }
 
-        IEnumerator ServerDelayedCast(double expectedCastTime, Quaternion oldLookDirection)
+        IEnumerator ServerDelayedCast(double expectedCastTime, Quaternion oldLookDirection, Vector3 oldOffset)
         {
             while (NetworkManager.ServerTime.Time < expectedCastTime)
             {
@@ -145,7 +149,8 @@ namespace Hypersycos.RogueFrame
             }
             Ability delayedAbility = abilities[lastCastAbility];
             Quaternion lookDirection = lastCastRotation ?? oldLookDirection;
-            Vector3 cameraPosition = cameraRoot.position + lookDirection * cameraOffset;
+            Vector3 cameraOffset = lastCastOffset ?? oldOffset;
+            Vector3 cameraPosition = cameraRoot.position + cameraOffset;
             delayedAbility.DelayedCastEffect(cameraPosition, lookDirection, playerState);
         }
 
@@ -160,7 +165,7 @@ namespace Hypersycos.RogueFrame
 
         private void CastUltimate(InputAction.CallbackContext obj)
         {
-            CastServerRpc(4, camera.rotation);
+            CastServerRpc(4, camera.rotation, camera.position - cameraRoot.position);
         }
 
         private void SetAbility(InputAction.CallbackContext obj)

@@ -8,52 +8,6 @@ namespace Hypersycos.RogueFrame
 {
     public abstract class CharacterState : NetworkBehaviour
     {
-        protected void StartSync()
-        {
-            for(int i = 0; i < SyncedInstances.Count; i++)
-            {
-                ISync inst = SyncedInstances[i];
-                inst.StartSync(SyncStat, i);
-            }
-        }
-
-        protected virtual void FixedUpdate()
-        {
-            if (!IsServer) return;
-
-            HitPoints.Tick(Time.fixedDeltaTime);
-            List<StatusInstance> ToRemove = new();
-            foreach(List<StatusInstance> instances in statusInstances.Values)
-            {
-                foreach(StatusInstance inst in instances)
-                {
-                    if (inst is DurationStatusInstance)
-                    {
-                        DurationStatusInstance dInst = (DurationStatusInstance)inst;
-                        dInst.duration -= Time.fixedDeltaTime;
-                        if (dInst.duration < 0)
-                        {
-                            ToRemove.Add(inst);
-                        }
-                    }
-                }
-            }
-            foreach(StatusInstance inst in ToRemove)
-            {
-                RemoveStatus(inst);
-            }
-        }
-
-        [SerializeField] [field: SerializeReference] private List<ISync> _SyncedInstances = new();
-        protected List<ISync> SyncedInstances
-        {
-            get { return _SyncedInstances; }
-            set
-            {
-                _SyncedInstances = value;
-                if (IsServer) StartSync();
-            }
-        }
         public class CharacterStateHealthEvent : UnityEvent<CharacterState, DamageInstance> { }
         [System.Serializable] public class CharacterStateStatusEvent : UnityEvent<CharacterState, StatusInstance> { }
 
@@ -83,6 +37,55 @@ namespace Hypersycos.RogueFrame
         public CharacterStateStatusEvent AfterStatusAdded = new();
         public CharacterStateStatusEvent BeforeStatusRemoved = new();
         public CharacterStateStatusEvent AfterStatusRemoved = new();
+
+        [SerializeField][field: SerializeReference] private List<ISync> _SyncedInstances = new();
+        protected List<ISync> SyncedInstances
+        {
+            get { return _SyncedInstances; }
+            set
+            {
+                _SyncedInstances = value;
+                if (IsServer) StartSync();
+            }
+        }
+
+        protected void StartSync()
+        {
+            for(int i = 0; i < SyncedInstances.Count; i++)
+            {
+                ISync inst = SyncedInstances[i];
+                inst.StartSync(SyncStat, i);
+            }
+        }
+
+        protected virtual void FixedUpdate()
+        {
+            if (!IsServer) return;
+
+            HitPoints.Tick(Time.fixedDeltaTime);
+
+            //TODO: Move to tick-based system
+            List<StatusInstance> ToRemove = new();
+            foreach(List<StatusInstance> instances in statusInstances.Values)
+            {
+                foreach(StatusInstance inst in instances)
+                {
+                    if (inst is DurationStatusInstance)
+                    {
+                        DurationStatusInstance dInst = (DurationStatusInstance)inst;
+                        dInst.duration -= Time.fixedDeltaTime;
+                        if (dInst.duration < 0)
+                        {
+                            ToRemove.Add(inst);
+                        }
+                    }
+                }
+            }
+            foreach(StatusInstance inst in ToRemove)
+            {
+                RemoveStatus(inst);
+            }
+        }
 
         protected virtual void SyncStat(int index, SyncChange data)
         {
@@ -117,8 +120,7 @@ namespace Hypersycos.RogueFrame
             BeforeStatusAdded.Invoke(this, instance);
             if (!statusInstances.ContainsKey(instance.StatusEffect))
             {
-                statusInstances.Add(instance.StatusEffect, new List<StatusInstance>());
-                statusInstances[instance.StatusEffect].Add(instance);
+                statusInstances.Add(instance.StatusEffect, new List<StatusInstance>{ instance });
                 ApplyStatus(instance);
             }
             else
@@ -127,26 +129,32 @@ namespace Hypersycos.RogueFrame
                 switch (instance.StatusEffect.StackType)
                 {
                     case StatusEffect.StackMethod.Additive:
+                        //Additive effects only ever have one instance
                         insts[0].Combine(instance);
                         break;
                     case StatusEffect.StackMethod.StackingRefresh:
-                        foreach(StatusInstance inst in insts)
+                        //Reset all timers and add status
+                        foreach (StatusInstance inst in insts)
                         {
                             inst.Refresh(instance);
                         }
                         insts.Add(instance);
                         break;
                     case StatusEffect.StackMethod.SingleRefresh:
+                        //Reset timer
                         insts[0].Refresh(instance);
                         break;
                     case StatusEffect.StackMethod.Instance:
+                        //Individual instance, e.g. DoT
                         insts.Add(instance);
                         ApplyStatus(instance);
                         break;
                     case StatusEffect.StackMethod.SingleInstance:
+                        //Pick the more "powerful" instance
                         insts[0].Refresh(instance);
                         break;
                     case StatusEffect.StackMethod.SingleInstancePerSource:
+                        //Pick the most "powerful" instance, but multiple entities can apply different instances
                         bool Found = false;
                         foreach (StatusInstance inst in insts)
                         {

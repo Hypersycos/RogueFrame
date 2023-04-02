@@ -11,3 +11,26 @@ Sort of time pressure, clear stage in certain time?
 Competition? PvE race
 Team vs Team - invade others?
 Hot potato
+
+TODO:
+	Stat rewrite?
+		StatRegeneration owner and callback?
+			Allows progress tracking
+			Allows bonuses to trigger off HoT and DoT
+		StatRegeneration valid targets
+			Allows choosing what health pools HoTs can heal (e.g. no overhealth)
+			Allows DoTs which target specific health pools
+		
+		StatSystem Container?
+	
+		Custom Editor for StatInstance & co
+	
+
+
+OTHER GAME
+Splatoon + Infection?
+
+Voxel MMO:
+	Start on barren-ish island (or friends) - will serve as home base
+	Create vessel to travel through space (or space analogue) - vehicle fights like p101?
+	Floating shards - shared p2p instances?

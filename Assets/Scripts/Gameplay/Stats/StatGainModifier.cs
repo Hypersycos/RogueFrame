@@ -22,6 +22,7 @@ namespace Hypersycos.RogueFrame
             Negative,
             Both
         }
+        //Whether the modifier applies to increases, decreases or both
         public Direction GainDirection { get; protected set; }
     }
 }

@@ -8,10 +8,10 @@ namespace Hypersycos.RogueFrame
     {
         public enum ChangeBehaviour
         {
-            Fill,
-            Proportional,
-            Empty,
-            Overflow
+            Fill, //Modifies current value by same amount as the change in maximum
+            Proportional, //Modifies value by x% of the change, where x% is curVal/curMax
+            Crop, //Make no change, unless value would be greater than new max
+            Overflow //Make no change
         }
 
         public ChangeBehaviour AddBehaviour;

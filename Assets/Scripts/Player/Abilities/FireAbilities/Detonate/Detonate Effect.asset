@@ -12,10 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e98f042ecf80ea04995eda131c4a07d1, type: 3}
   m_Name: Detonate Effect
   m_EditorClassIdentifier: 
-  Range: 10
-  ValidHits: 0000000001000000
+  Heat: {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
+  ExplosionRange: 4
   LayerMask:
     serializedVersion: 2
     m_Bits: 256
-  Heat: {fileID: 11400000, guid: 408a6fd48e8a0784da3cecc525b4ff3b, type: 2}
-  ExplosionRange: 4
+  VisualEffect: {fileID: 11400000, guid: 1d320bacf627b704285aa464de727a17, type: 2}

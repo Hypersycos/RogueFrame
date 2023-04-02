@@ -68,11 +68,11 @@ namespace Hypersycos.RogueFrame
                 }
             }
             if (StackBehaviour == StackType.Multiplicative)
-            {
+            { //Abuse of StackType - Multiplicative = % of max / s
                 temp *= MaxValue;
             }
             else if (StackBehaviour == StackType.MultiplicativeAdditive)
-            {
+            { //MultiplicativeAdditive = % of current value / s
                 temp *= HealthValue;
             }
             if (DelayTimer < Delay)

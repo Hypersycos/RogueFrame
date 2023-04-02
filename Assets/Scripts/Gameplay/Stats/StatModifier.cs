@@ -9,14 +9,17 @@ namespace Hypersycos.RogueFrame
         //TODO: Implement stat tracking
         public enum StackType
         {
-            Multiplicative = 0,
-            MultiplicativeAdditive = 1,
-            Flat = 2
+            Multiplicative = 0, //Flat multiplier
+            MultiplicativeAdditive = 1, //Additive with modifiers of the same kind to produce a multiplier
+            Flat = 2 //Flat bonus
         }
 
+        //How the modifier interacts with other modifiers
         public StackType StackBehaviour { get; private set; }
+        //Different levels are always multiplicative with each other
         public int? StackLevel { get; private set; }
         public float Value { get; private set; }
+        //Total ordering, lower is earlier
         public int Priority => (StackLevel ?? int.MaxValue / 3 - 1) * 3 + ((int)StackBehaviour);
         public bool CanSelfStack { get; private set; }
         public CharacterState CharacterSource { get; private set; }

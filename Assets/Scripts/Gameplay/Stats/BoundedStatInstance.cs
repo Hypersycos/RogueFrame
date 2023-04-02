@@ -74,6 +74,7 @@ namespace Hypersycos.RogueFrame
                     Value += difference;
                     break;
                 default:
+                    //TODO: Implement Overflow
                     MaxValue = NewMax;
                     if (Value > MaxValue) Value = MaxValue;
                     break;

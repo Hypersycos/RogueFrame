@@ -101,9 +101,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7424f41009ff91240813252a7a853cb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LaunchVelocity: {x: 0, y: 0, z: 32}
+  LaunchVelocity: {x: 0, y: 0, z: 24}
   Lifetime: 0
-  Range: 20
+  Range: 12
   MaxEnemyHits: 0
   MaxTerrainHits: 0
   MaxHits: 0
