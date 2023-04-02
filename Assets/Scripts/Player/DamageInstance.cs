@@ -18,11 +18,7 @@ namespace Hypersycos.RogueFrame
         {
             get
             {
-                if (_ActualAmount == null)
-                {
-                    _ActualAmount = Amount;
-                }
-                return (float)_ActualAmount;
+                return _ActualAmount ?? Amount;
             }
             set
             {
@@ -40,8 +36,8 @@ namespace Hypersycos.RogueFrame
 
         public DamageInstance(bool isDamage, float amount, StatTypeTarget validStatTypes)
         {
-            this.IsDamage = isDamage;
-            this.Amount = amount;
+            IsDamage = isDamage;
+            Amount = amount;
             ActualAmount = amount;
             ValidStatTypes = validStatTypes;
         }
@@ -70,8 +66,5 @@ namespace Hypersycos.RogueFrame
                 Debug.Log("Attempted to set damage instance owner twice");
             owner = Owner ?? throw new ArgumentNullException(nameof(Owner));
         }
-        //TODO: List of modifiers which can only apply once
-        //e.g. if a character is splitting its damage with someone else, they can't also
-        //apply that since that would cause an infinite loop
     }
 }

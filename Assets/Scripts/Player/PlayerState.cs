@@ -34,6 +34,11 @@ namespace Hypersycos.RogueFrame
         Dictionary<StatBarRotator, DamageTextInstance> LastHealNumbers = new();
         float TextMergeTimer = 0.15f;
 
+        [SerializeField] protected BoundedStatInstance Energy = new BoundedStatInstance(100, 0, 100);
+        [SerializeField] DefenseStatInstance Health = new DefenseStatInstance(100, new SemiBoundedStatInstance(150, 0));
+        [SerializeField] DefenseStatInstance Shields = new DefenseStatInstance(50);
+        [SerializeField] DefenseStatInstance OverHealth = new DefenseStatInstance(400);
+
         void Start()
         {
             Team = 0;
@@ -105,11 +110,6 @@ namespace Hypersycos.RogueFrame
             }
         }
 
-        [SerializeField] protected BoundedStatInstance Energy = new BoundedStatInstance(100, 0, 100);
-        [SerializeField] DefenseStatInstance Health = new DefenseStatInstance(100, new SemiBoundedStatInstance(150, 0));
-        [SerializeField] DefenseStatInstance Shields = new DefenseStatInstance(50);
-        [SerializeField] DefenseStatInstance OverHealth = new DefenseStatInstance(400);
-
         public bool UseEnergy(float amount)
         {
             return Energy.TryRemoveValue(amount);
@@ -168,6 +168,7 @@ namespace Hypersycos.RogueFrame
             CreateHealNumberClientRpc(victim.NetworkObject, healNumber, c, clientRpcParams);
         }
 
+        //TODO: Code re-use: only change is CreateDamageNumberCommon(..,.., dict)
         [ClientRpc]
         private void CreateHealNumberClientRpc(NetworkObjectReference victimRef, float number, Color c, ClientRpcParams clientRpcParams = default)
         {

@@ -24,6 +24,11 @@ namespace Hypersycos.RogueFrame
         [SerializeField, ReadOnly] protected readonly StatGainInstance NegativeGainModifier = new StatGainInstance();
         [SerializeField, ReadOnly] protected readonly List<StatRegenerationModifier> StatRegenerationModifiers = new();
 
+        //OnIncrease will not be called if OnFill is called
+        //Same for OnEmpty and OnDecrease
+        //Events which trigger on any change should subscribe to both
+        //OnEmpty and OnDecrease will present the change as a negative number
+        //I.e 50->30 will have -20 as value
         public CappedBoundedStatEvent OnFill = new();
         public BoundedStatEvent OnIncrease = new();
         public BoundedStatEvent OnDecrease = new();
@@ -48,6 +53,7 @@ namespace Hypersycos.RogueFrame
             {
                 float change = modifier.Tick(deltaTime, MaxValue, Value);
                 float FlatMultiplier = modifier.Interval == 0 ? deltaTime : 1;
+                //FlatMultiplier used for smooth changes
                 if (change > 0)
                 {
                     AddValue(change, FlatMultiplier);
@@ -61,6 +67,7 @@ namespace Hypersycos.RogueFrame
 
         protected virtual void ApplyChangeBehaviour(BoundedStatModifier.ChangeBehaviour changeBehaviour, float NewMax)
         {
+            //Applies new max, and scales current value to match
             switch (changeBehaviour)
             {
                 case BoundedStatModifier.ChangeBehaviour.Proportional:
@@ -74,7 +81,7 @@ namespace Hypersycos.RogueFrame
                     Value += difference;
                     break;
                 default:
-                    //TODO: Implement Overflow
+                    //TODO: Implement ChangeBehaviour.Overflow
                     MaxValue = NewMax;
                     if (Value > MaxValue) Value = MaxValue;
                     break;
@@ -128,6 +135,7 @@ namespace Hypersycos.RogueFrame
                         OnIncrease.Invoke(this, Amount);
                     }
                 }
+                //Interrupt even if no change
                 InterruptDOTs();
             }
             else if (Amount < 0)
@@ -146,6 +154,7 @@ namespace Hypersycos.RogueFrame
                         OnDecrease.Invoke(this, Amount);
                     }
                 }
+                //Interrupt even if no change
                 InterruptHOTs();
             }
             return Amount;
@@ -172,6 +181,7 @@ namespace Hypersycos.RogueFrame
         public float AddValue(float Amount, float FlatMultiplier=1, bool AllowInversions = false)
         {
             float ModifiedAmount = Amount;
+            //FlatMultiplier used for smooth modifiers
             ModifiedAmount = PositiveGainModifier.Apply(ModifiedAmount, FlatMultiplier);
             if (ModifiedAmount == 0 || (!AllowInversions && ModifiedAmount < 0))
             {
@@ -191,14 +201,10 @@ namespace Hypersycos.RogueFrame
             return -ApplyChange(-ModifiedAmount);
         }
 
-        public bool CanRemoveValue(float Amount, float FlatMultiplier = 1, bool AllowInversions = false)
+        public bool CanRemoveValue(float Amount, float FlatMultiplier = 1)
         {
             float ModifiedAmount = Amount;
             ModifiedAmount = NegativeGainModifier.Apply(ModifiedAmount, FlatMultiplier);
-            if (!AllowInversions && ModifiedAmount < 0)
-            {
-                ModifiedAmount = 0;
-            }
             return ModifiedAmount <= Value;
         }
 
@@ -302,7 +308,7 @@ namespace Hypersycos.RogueFrame
         }
 
         public void StartSync(Action<int, SyncChange> syncFunc, int index)
-        {
+        { //Horrible bodge for syncing across the network
             OnDecrease.AddListener((_, change) => syncFunc(index, new SyncChange(true, change)));
             OnIncrease.AddListener((_, change) => syncFunc(index, new SyncChange(true, change)));
             OnEmpty.AddListener((_, change, _) => syncFunc(index, new SyncChange(true, change)));
@@ -312,7 +318,7 @@ namespace Hypersycos.RogueFrame
         }
 
         public void ApplySync(SyncChange change)
-        {
+        { //Horrible bodge for syncing across the network
             if (change.IsValueChange)
             {
                 ClientSetValue(change.Change);

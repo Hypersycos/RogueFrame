@@ -16,7 +16,6 @@ namespace Hypersycos.RogueFrame
 
         public DefensePool HitPoints { get; protected set; }
 
-        //OnDamaged should not be invoked when the character is killed
         public CharacterStateHealthEvent OnDamaged = new();
         public CharacterStateHealthEvent OnExternallyDamaged = new();
         public CharacterStateHealthEvent OnHealed = new();
@@ -43,7 +42,7 @@ namespace Hypersycos.RogueFrame
         {
             get { return _SyncedInstances; }
             set
-            {
+            { //TODO: What if set again? Ghost syncs / errors?
                 _SyncedInstances = value;
                 if (IsServer) StartSync();
             }
@@ -64,7 +63,7 @@ namespace Hypersycos.RogueFrame
 
             HitPoints.Tick(Time.fixedDeltaTime);
 
-            //TODO: Move to tick-based system
+            //TODO: Move to tick/inheritance-based system
             List<StatusInstance> ToRemove = new();
             foreach(List<StatusInstance> instances in statusInstances.Values)
             {
@@ -139,6 +138,7 @@ namespace Hypersycos.RogueFrame
                             inst.Refresh(instance);
                         }
                         insts.Add(instance);
+                        ApplyStatus(instance);
                         break;
                     case StatusEffect.StackMethod.SingleRefresh:
                         //Reset timer
@@ -185,6 +185,7 @@ namespace Hypersycos.RogueFrame
             {
                 statusInstances.Remove(instance.StatusEffect);
             }
+            //All stack methods either have individual apply/unapply, or only one instance
             UnapplyStatus(instance);
             AfterStatusRemoved.Invoke(this, instance);
         }
@@ -201,7 +202,7 @@ namespace Hypersycos.RogueFrame
 
         public void ApplyDamageInstance(DamageInstance damageInstance, bool external=true)
         {
-            if (!damageInstance.IsDamage) return;
+            if (!damageInstance.IsDamage || !HitPoints.IsActive) return;
             damageInstance.BeforeApply.Invoke(this, damageInstance);
             BeforeDamaged.Invoke(this, damageInstance);
 

@@ -7,8 +7,11 @@ namespace Hypersycos.RogueFrame
     [System.Serializable]
     public class DefenseStatInstance : BoundedStatInstance
     {
+        //Overcomplicated armour variable for fun
         [field: SerializeField] public SemiBoundedStatInstance ReductionStat { get; protected set; }
+        //IsOverhealth indicates shouldn't be used for "max health"
         [field: SerializeField] public bool IsOverhealth { get; protected set; }
+        //50 armour => neutral damage reduction
         float ReductionValue => ReductionStat is null ? 50 : ReductionStat.Value;
         float DamageReduction => (ReductionValue - 50) / (ReductionValue + 50);
         float DamageMultiplier => 100 / (ReductionValue + 50);
@@ -47,7 +50,7 @@ namespace Hypersycos.RogueFrame
                 else
                 {
                     Overflow *= EHPMultiplier;
-                    Overflow = NegativeGainModifier.Reverse(Overflow);
+                    Overflow = NegativeGainModifier.Reverse(-Overflow);
                     return Overflow;
                 }
             }

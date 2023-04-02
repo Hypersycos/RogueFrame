@@ -26,7 +26,7 @@ namespace Hypersycos.RogueFrame
             }
 
             public bool IsValid(StatType type)
-            {
+            { //No need for inclusive null/empty list, so assume null => AllValid
                 if (Types == null) return true;
                 return Types.Contains(type) ^ IsExclusive;
             }
@@ -68,6 +68,7 @@ namespace Hypersycos.RogueFrame
             }
         }
 
+        //Value doesn't include overhealth
         public float Value
         {
             get
@@ -83,6 +84,7 @@ namespace Hypersycos.RogueFrame
                 return sum;
             }
         }
+        //TotalValue includes overhealth
         public float TotalValue
         {
             get
@@ -110,23 +112,24 @@ namespace Hypersycos.RogueFrame
         public Color GetDamageColor()
         {
             int index = DefenseInstances.Count - 1;
+            DefenseStatInstance inst = DefenseInstances[index--];
             while (index > 0)
             {
-                DefenseStatInstance inst = DefenseInstances[index--];
+                inst = DefenseInstances[index--];
                 if (inst.IsActive) break;
             }
-            return DefenseInstances[index].StatType.Color;
+            return inst.StatType.Color;
         }
 
         public void Tick(float deltaTime)
         {
             if (!IsActive) return;
             foreach (DefenseStatInstance defenseInstance in DefenseInstances)
-            {
+            { //do specific regens & dots first
                 defenseInstance.Tick(deltaTime);
             }
             foreach(KeyValuePair<StatRegenerationModifier,StatTypeTarget> pair in StatRegenerationModifiers)
-            {
+            { //DoTs could kill between applications, need to keep checking
                 if (!IsActive) return;
                 StatRegenerationModifier regenerator = pair.Key;
                 StatTypeTarget validTargets = pair.Value;
@@ -147,6 +150,13 @@ namespace Hypersycos.RogueFrame
             int index = DefenseInstances.Count - 1;
             float amount = instance.ActualAmount;
             float dealt = 0;
+
+            foreach (KeyValuePair<StatRegenerationModifier, StatTypeTarget> pair in StatRegenerationModifiers)
+            {
+                if (pair.Key.Value > 0)
+                    pair.Key.Interrupt();
+            }
+
             while (index >= 0 && amount > 0)
             {
                 DefenseStatInstance inst = DefenseInstances[index--];
@@ -154,16 +164,13 @@ namespace Hypersycos.RogueFrame
                 {
                     if (inst.IsActive)
                     {
-
                         dealt += inst.Value;
                         float overflow = inst.RemoveValue(amount);
                         dealt -= inst.Value;
                         amount = overflow;
                     }
-                    else
-                    {
-                        inst.InterruptHOTs();
-                    }
+                    //interrupt HoTs for all valid layers which would take damage if they were non-empty
+                    inst.InterruptHOTs();
                 }
             }
             instance.ActualAmount = dealt;
@@ -174,6 +181,13 @@ namespace Hypersycos.RogueFrame
             int index = 0;
             float amount = instance.ActualAmount;
             float dealt = 0;
+
+            foreach (KeyValuePair<StatRegenerationModifier, StatTypeTarget> pair in StatRegenerationModifiers)
+            {
+                if (pair.Key.Value < 0)
+                    pair.Key.Interrupt();
+            }
+
             while (index < DefenseInstances.Count && amount > 0)
             {
                 DefenseStatInstance inst = DefenseInstances[index++];
@@ -186,10 +200,8 @@ namespace Hypersycos.RogueFrame
                         dealt += inst.Value;
                         amount = overflow;
                     }
-                    else
-                    {
-                        inst.InterruptDOTs();
-                    }
+                    //interrupt DoTs for all valid layers which would heal if they were non-full
+                    inst.InterruptDOTs();
                 }
             }
             instance.ActualAmount = dealt;
@@ -235,7 +247,7 @@ namespace Hypersycos.RogueFrame
                     }
                     break;
                 default:
-                    throw new System.Exception("Attempt to add invalid modifier to bounded stat");
+                    throw new System.Exception("Attempt to add invalid modifier to defense pool");
             }
         }
 
@@ -288,7 +300,7 @@ namespace Hypersycos.RogueFrame
                     }
                     break;
                 default:
-                    throw new System.Exception("Attempt to add invalid modifier to bounded stat");
+                    throw new System.Exception("Attempt to add invalid modifier to defense pool");
             }
         }
     }

@@ -24,12 +24,12 @@ namespace Hypersycos.RogueFrame
         public DurationStatusInstance() : this(0, null, 0) { }
 
         public override void Combine(StatusInstance other)
-        {
+        { //Combine durations of instances
             duration += ((DurationStatusInstance)other).duration;
         }
 
         public override void Refresh(StatusInstance other)
-        {
+        { //Take largest duration when refreshed by other status
             duration = Mathf.Max(duration, ((DurationStatusInstance)other).duration);
         }
     }

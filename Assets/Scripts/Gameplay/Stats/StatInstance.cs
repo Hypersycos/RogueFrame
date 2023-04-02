@@ -32,6 +32,7 @@ namespace Hypersycos.RogueFrame
             if (modifier.CanSelfStack)
             {
                 int index = StatModifiers.BinarySearch(modifier, new ByPriority());
+                //If priority not found, returns bitwise complement of the index to insert at
                 index = index < 0 ? ~index : index;
                 StatModifiers.Insert(index, modifier);
             }
@@ -104,6 +105,7 @@ namespace Hypersycos.RogueFrame
                 switch (modifier.StackBehaviour)
                 {
                     case StatModifier.StackType.Flat:
+                        //FlatMultiplier is used for smooth regeneration
                         start += modifier.Value * flatMultiplier;
                         break;
                     case StatModifier.StackType.MultiplicativeAdditive:

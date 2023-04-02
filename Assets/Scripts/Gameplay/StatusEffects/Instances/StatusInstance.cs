@@ -11,6 +11,7 @@ namespace Hypersycos.RogueFrame
     {
         [field: SerializeField] public StatusEffect StatusEffect { get; protected set; }
         public float Amount;
+        //Used to prevent infinite loops
         public HashSet<string> OneTimeEffects = new();
         public CharacterState owner { get; private set; } = null;
 
@@ -30,7 +31,7 @@ namespace Hypersycos.RogueFrame
         public virtual StatusInstance CloneInstance()
         {
             StatusInstance clone = (StatusInstance)MemberwiseClone();
-            return Clone(clone);
+            return CloneMembers(clone);
         }
 
         public void SetOwner(CharacterState Owner)
@@ -43,7 +44,7 @@ namespace Hypersycos.RogueFrame
         public abstract void Combine(StatusInstance other);
         public abstract void Refresh(StatusInstance other);
 
-        public virtual StatusInstance Clone(StatusInstance clone)
+        public virtual StatusInstance CloneMembers(StatusInstance clone)
         {
             clone.OneTimeEffects = new HashSet<string>(clone.OneTimeEffects);
             return clone;
