@@ -6,7 +6,7 @@ namespace Hypersycos.RogueFrame
 {
     [CreateAssetMenu(fileName = "New Hit Count Determiner", menuName = "Abilities/Determiners/Hit Count")]
     public class HitCountDeterminer : IResultDeterminer
-    {
+    { //Requires more than Threshold hits to charge
         public int HitCount = 0;
         [SerializeField] protected int Threshold = 0;
 

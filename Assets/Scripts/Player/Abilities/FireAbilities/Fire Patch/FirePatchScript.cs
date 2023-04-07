@@ -55,7 +55,13 @@ namespace Hypersycos.RogueFrame
             {
                 state.AddStatus(new IgniteStatusInstance(Strength, Duration, Owner, Ignite, Heat));
             }
+            foreach(StatusInstance heatProc in state.GetStatusInstances(Heat))
+            {
+                ShareHeatProcs(state, heatProc);
+            }    
             state.AfterStatusAdded.AddListener(ShareHeatProcs);
+            //TODO: On death remove victim
+            //TODO: On cleanse stop sharing ignite
 
             state.ApplyDamageInstance(new DamageInstance(true, Damage, Owner, ValidStatTypes));
         }
@@ -65,12 +71,12 @@ namespace Hypersycos.RogueFrame
             if (proc is HeatStatusInstance && !proc.OneTimeEffects.Contains("FirePatch"))
             {
                 HeatStatusInstance HeatProc = (HeatStatusInstance)proc;
+                proc.OneTimeEffects.Add("FirePatch");
                 foreach(CharacterState victim in victims)
                 {
                     if (victim != progenitor)
                     {
                         StatusInstance Clone = HeatProc.CloneInstance();
-                        Clone.OneTimeEffects.Add("FirePatch");
                         victim.AddStatus(Clone);
                     }
                 }
@@ -96,7 +102,8 @@ namespace Hypersycos.RogueFrame
             if (state == null || state.Team == Owner.Team) return;
 
             if (SharingIgnite && victims.Count == 1)
-            {
+            { //only way ignite sharing can end (currently) is if all victims leave the patch
+              //since constant damage + ignite's indefinite duration
                 SharingIgnite = false;
             }
             int Index = victims.IndexOf(state);
@@ -108,7 +115,8 @@ namespace Hypersycos.RogueFrame
         {
             base.FixedUpdate();
             for (int i = 0; i < victims.Count; i++)
-            {
+            { //uses individual timers so that the first damage tick happens as soon as an enemy
+              //enters the patch
                 if (timers[i] <= 0)
                 {
                     victims[i].ApplyDamageInstance(new DamageInstance(true, Damage, Owner, ValidStatTypes));

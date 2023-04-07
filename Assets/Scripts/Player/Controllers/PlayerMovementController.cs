@@ -111,7 +111,8 @@ namespace Hypersycos.RogueFrame
             {
                 float oldMaxSpeed = (maxSpeed / crouchSpeed);
                 if (horizontalVelocity.magnitude / oldMaxSpeed > slideThreshold && IsGrounded())
-                {
+                { //slide
+                    //TODO: should slide just use velocity? Should falling really far into slide work?
                     if (horizontalVelocity.magnitude < oldMaxSpeed * (1 + slideImpulse))
                     {
                         float magnitude = Mathf.Min(oldMaxSpeed * slideImpulse, oldMaxSpeed * (1 + slideImpulse) - horizontalVelocity.magnitude);
@@ -142,8 +143,9 @@ namespace Hypersycos.RogueFrame
                 return;
             }
             Vector3 inputForce = Vector3.zero;
-            inputForce += move.ReadValue<Vector2>().x * GetCameraRight(playerCamera) * moveForce * Time.fixedDeltaTime;
-            inputForce += move.ReadValue<Vector2>().y * GetCameraForward(playerCamera) * moveForce * Time.fixedDeltaTime;
+            inputForce += move.ReadValue<Vector2>().x * moveForce * Time.fixedDeltaTime * GetCameraRight(playerCamera);
+            inputForce += move.ReadValue<Vector2>().y * moveForce * Time.fixedDeltaTime * GetCameraForward(playerCamera);
+            //TODO: does this do anything?
             float inputCap = move.ReadValue<Vector2>().magnitude * maxSpeed;
             inputForce *= IsGrounded() ? 1 : airStrafeRate;
             if (horizontalVelocity != Vector3.zero)
@@ -156,26 +158,30 @@ namespace Hypersycos.RogueFrame
             if (horizontalVelocity.magnitude > maxSpeed)
             {
                 inputForce *= overspeedControl;
-                Vector3 dragForce = -horizontalVelocity.normalized * drag * horizontalVelocity.magnitude * Time.fixedDeltaTime;
+                Vector3 dragForce = -horizontalVelocity * drag * Time.fixedDeltaTime;
                 float carryComponent = Vector3.Dot(-dragForce.normalized, inputForce);
                 if (carryComponent > overspeedCarry * dragForce.magnitude)
-                {
+                { //TODO: figure out what this does exactly
                     Vector3 complement = new Vector3(-dragForce.normalized.z, 0, dragForce.normalized.x);
                     float otherMagnitude = Vector3.Dot(complement, inputForce);
                     inputForce = -dragForce * overspeedCarry + complement * otherMagnitude;
                 }
                 float heightChange = characterController.velocity.y / horizontalVelocity.sqrMagnitude * 4;
+                //TODO: losing height in air doesn't speed up slide? Should falling really far into slide work?
                 if (horizontalVelocity.magnitude - 0.0001f < maxSpeed || !IsGrounded() || lastJump > 0f)
-                {
+                { //don't apply slide height velocity if user isn't pushing to max speed
+                  //or isn't on the ground
+                  //or jumped recently
                     heightChange = 0;
                 }
+                //TODO: acceleration increases with velocity? Seems liable to bug out
                 Vector3 heightChangeAcceleration = dragForce.normalized * heightChange;
                 velocity += inputForce + dragForce + heightChangeAcceleration;
             }
             else
             {
                 if (inputForce == Vector3.zero)
-                {
+                { //If no input, smooth towards 0 velocity
                     float force = maxSpeed * Time.fixedDeltaTime / smoothing * (IsGrounded() ? 1 : airStrafeRate);
                     if (force > horizontalVelocity.magnitude)
                     {
@@ -188,7 +194,7 @@ namespace Hypersycos.RogueFrame
                     }
                 }
                 else
-                {
+                { //TODO: does this allow basically instant stopping, completely bypassing smoothing?
                     Vector3 temp = horizontalVelocity + inputForce;
                     if (temp.magnitude > inputCap)
                     {
@@ -212,7 +218,8 @@ namespace Hypersycos.RogueFrame
                 }
             }
             if (IsGrounded() && velocity.y <= 0f)
-            {
+            { //TODO: why multiply rather than set to 0?
+              //To avoid floating?
                 velocity.y *= 0.7f;
                 if (velocity.y > -0.1f)
                     velocity.y = 0f;
@@ -254,11 +261,13 @@ namespace Hypersycos.RogueFrame
                     //check if something within jump height close below
                     Ray ray = new Ray(this.transform.position + Vector3.up * 0.25f, Vector3.down);
                     bool withinJumpHeight = Physics.Raycast(ray, out RaycastHit hit, 0.3f + jumpHeight);
+                    //looking at ground & superjumping mirrors camera
                     if (direction.y < 0 && (withinJumpHeight || IsGrounded()))
                     {
                         direction.y = -direction.y;
                     }
                     float horizontalMagnitude = Mathf.Min(horizontalVelocity.magnitude, maxSpeed/crouchSpeed * (1+slideImpulse));
+                    //horizontalMagnitude used to allow jumping high, but horizontal jumps not faster than running
                     float jumpMagnitude = Mathf.Max(superJumpForce, horizontalMagnitude);
                     //superjump completely overrides currently velocity. Maybe should have some sort of scaling?
                     velocity = direction * jumpMagnitude;
@@ -290,7 +299,7 @@ namespace Hypersycos.RogueFrame
             if (Physics.Raycast(ray, out RaycastHit hit, 0.3f))
                 return true;
             else
-                return false || characterController.isGrounded;
+                return characterController.isGrounded; // || false
         }
 
         public void AddMovementModifier(float modifier, string name)

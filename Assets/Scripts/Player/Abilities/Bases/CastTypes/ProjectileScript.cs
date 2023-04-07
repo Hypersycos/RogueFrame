@@ -82,6 +82,7 @@ namespace Hypersycos.RogueFrame
             }
             distanceTravelled += (StartPosition - transform.position).magnitude;
             StartPosition = transform.position;
+            LastCollision = null;
         }
 
         private void OnTriggerExit(Collider other)
@@ -94,6 +95,7 @@ namespace Hypersycos.RogueFrame
                     if (PunchThrough > MaxPunchthroughLength)
                         Expire();
                 }
+                LastCollision = null;
             }
         }
 
@@ -101,6 +103,7 @@ namespace Hypersycos.RogueFrame
         {
             OnHitChar = onHit;
             OnHitObj = onHitObj;
+            //Have to set velocity here for some reason otherwise it doesn't work :)
             GetComponent<Rigidbody>().velocity = transform.rotation * LaunchVelocity;
             CanHitTriggers = GetComponent<Collider>().isTrigger;
             StartPosition = transform.position;

@@ -10,6 +10,7 @@ namespace Hypersycos.RogueFrame
         private Animator animator;
         private PlayerMovementController controllerScript;
         private CharacterController characterController;
+        //What speed is 1x speed
         [SerializeField] float runSpeedNormal = 5f;
         private float airtime = 2f;
         // Start is called before the first frame update
@@ -39,11 +40,12 @@ namespace Hypersycos.RogueFrame
             float animatorSpeed = controllerScript.movementModifiers;
             float velocity = horizontalVelocity.magnitude;
             float walkThreshold = Mathf.Min(runSpeedNormal / 2, controllerScript.maxSpeed / 2);
+
             if (horizontalVelocity != Vector3.zero && isGrounded)
             {
                 if (controllerScript.crouching)
                 {
-                    animatorSpeed = velocity / (runSpeedNormal) / controllerScript.crouchSpeed;
+                    animatorSpeed = velocity / runSpeedNormal / controllerScript.crouchSpeed;
                 }
                 else
                 {

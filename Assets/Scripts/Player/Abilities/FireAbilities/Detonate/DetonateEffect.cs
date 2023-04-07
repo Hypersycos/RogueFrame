@@ -26,7 +26,7 @@ namespace Hypersycos.RogueFrame
             {
                 HeatStatusInstance inst = (HeatStatusInstance)h;
                 if (inst.OneTimeEffects.Contains(debounceString))
-                {
+                { //Prevents infinite loops if this damage instance is used to create a heat status effect
                     continue;
                 }
                 int ticks = (int)inst.duration + 1;

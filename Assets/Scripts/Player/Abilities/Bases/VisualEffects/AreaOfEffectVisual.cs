@@ -5,7 +5,8 @@ using UnityEngine;
 namespace Hypersycos.RogueFrame
 {
     public class AreaOfEffectVisual : MonoBehaviour
-    {
+    { //Expands from startR to endR over rTime
+      //with alpha startAlpha to endAlpha over aTime
         [SerializeField] private float startR;
         [SerializeField] private float endR;
         [SerializeField] private float rTime;

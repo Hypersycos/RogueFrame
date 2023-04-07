@@ -26,25 +26,30 @@ namespace Hypersycos.RogueFrame
             if (damage.OneTimeEffects.Contains("Ignite")) return;
             float damageTick;
             if (damage.OneTimeEffects.Contains("NoScaleIgnite"))
-            {
-                damageTick = damage.Amount / ((int)(Heat.DefaultDuration * Duration) + 1);
+            { //NoScaleIgnite applies the damage exactly again
+              //Notably scales inversely with greater duration, and doesn't scale with str
+                int numTicks = (int)(Heat.DefaultDuration * Duration) + 1;
+                damageTick = damage.Amount / numTicks;
             }
             else
-            {
+            { //Normal application applies double damage over time, scaling with str & dur
                 damageTick = damage.Amount / Heat.DefaultDuration * 2 * Strength;
             }
             StatusInstance HeatInstance = new HeatStatusInstance(damageTick, damage.owner, Heat, Heat.DefaultDuration * Duration);
             HeatInstance.OneTimeEffects = new HashSet<string>(damage.OneTimeEffects);
+            //Don't allow ignite to chain
             HeatInstance.OneTimeEffects.Add("Ignite");
             victim.AddStatus(HeatInstance);
         }
 
         private IEnumerator Coroutine(CharacterState victim)
-        {
+        { //Don't apply ignite on self-damage
             victim.OnExternallyDamaged.AddListener(AddHeat);
+            //1s grace period to allow procs to start
             yield return new WaitForSeconds(1f);
             while (victim.GetStatusCount(Heat) > 0)
             {
+                //Loop while has heat procs, to allow maximum grace time
                 while (victim.GetStatusCount(Heat) > 0)
                     yield return new WaitForFixedUpdate();
                 yield return new WaitForSeconds(1f);

@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -63,7 +61,7 @@ namespace Hypersycos.RogueFrame
                 if (FadeValue < change)
                 {
                     change = FadeValue;
-                    fadeTimers = new();
+                    fadeTimers.Clear();
                 }
                 else
                 {
@@ -295,12 +293,12 @@ namespace Hypersycos.RogueFrame
             else
             {
                 if (chase <= Fades[index].sizeDelta.x)
-                {
+                { //TODO: Verify this doesn't bug out
                     Vector2 sizeDelta = Fades[index].sizeDelta;
                     Fades[index].sizeDelta = new Vector2(sizeDelta.x - chase, sizeDelta.y);
                 }
                 else
-                {
+                { //TODO: Why is Backs[index] being touched here?
                     Fades[index].sizeDelta = new Vector2(0, 0);
                     float diff = Fades[index].sizeDelta.x - chase;
                     Vector2 sizeDelta = Backs[index].sizeDelta;
@@ -333,7 +331,7 @@ namespace Hypersycos.RogueFrame
             float value = 0;
             bool needsRedraw = false;
             foreach (Bar bar in bars)
-            {
+            { //tick all the fades in each bar
                 float change = bar.Tick(Time.deltaTime);
                 if (change > 0)
                 {
@@ -344,7 +342,7 @@ namespace Hypersycos.RogueFrame
                     bar.Fade.sizeDelta = size;
 
                     if (bar.Stat is DefenseStatInstance && ((DefenseStatInstance)bar.Stat).IsOverhealth)
-                    {
+                    { //overhealth changing => total changed => redraw required
                         total -= change;
                         needsRedraw = true;
                     }

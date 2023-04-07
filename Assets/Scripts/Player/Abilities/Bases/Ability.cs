@@ -41,7 +41,7 @@ namespace Hypersycos.RogueFrame
             return true;
         }
         public void CastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster)
-        {
+        { //Called instantly when ability cast
             foreach (ICastType castEffect in CastEffects)
             {
                 castEffect.BeforeCast();
@@ -53,7 +53,7 @@ namespace Hypersycos.RogueFrame
             }
         }
         public void DelayedCastEffect(Vector3 cameraPosition, Quaternion lookDirection, PlayerState caster)
-        {
+        { //Called after casting animation finishes
             foreach (ICastType castEffect in DelayedCastEffects)
             {
                 castEffect.BeforeCast();

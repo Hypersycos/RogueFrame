@@ -9,7 +9,7 @@ namespace Hypersycos.RogueFrame
 {
     public class PlayerAbilityController : NetworkBehaviour
     {
-        // Start is called before the first frame update
+        //TODO: Replace latency hiding logic
         private Controls ControlAsset;
         [SerializeField] private new Transform camera;
         [SerializeField] private Transform cameraRoot;
@@ -55,12 +55,13 @@ namespace Hypersycos.RogueFrame
         }
 
         private void CastAbility(InputAction.CallbackContext obj)
-        {
+        { //If not still in casting animation
             if (clientCastLockout >= 0 && clientCastLockout < NetworkManager.ServerTime.Time)
-            {
+            { //Lock casting
                 clientCastLockout = -1;
                 CastServerRpc(currentAbility, camera.rotation, camera.position - cameraRoot.position);
                 Ability selected = abilities[currentAbility];
+                //store current ability for delayed casts
                 lastCastAbility = currentAbility;
                 if (selected.CastTime > 0)
                 {
@@ -76,6 +77,7 @@ namespace Hypersycos.RogueFrame
                 waitTime -= Time.fixedDeltaTime * castSpeed;
                 yield return new WaitForFixedUpdate();
             }
+            //Send player's camera rotation to server when delayed cast should happen
             DelayedCastServerRpc(camera.rotation);
         }
 
@@ -97,21 +99,26 @@ namespace Hypersycos.RogueFrame
                 return;
             }
             else
-            {
+            { //Server thinks still locked in casting animation, sends to client
                 CastResultClientRpc(serverCastLockout, -1);
                 return;
             }
 
+            //Reset stored values
             lastCastOffset = null;
             lastCastRotation = null;
 
             Ability ability = abilities[abilityIndex];
+            //Attempt to charge player for ability
             if (ability.CastCost(playerState))
             {
                 Vector3 cameraPosition = cameraRoot.position + cameraOffset;
+                //create immediate effects
                 ability.CastEffect(cameraPosition, lookDirection, playerState);
+                //set lockout to animation time and share with client
                 serverCastLockout = NetworkManager.ServerTime.Time + ability.AnimationTime;
                 CastResultClientRpc(serverCastLockout, ability.CastTime);
+                //if ability has a delayed effect then start delayed cast
                 if (ability.CastTime > 0)
                 {
                     StartCoroutine(ServerDelayedCast(NetworkManager.ServerTime.Time + ability.CastTime, lookDirection, cameraOffset));
@@ -120,6 +127,7 @@ namespace Hypersycos.RogueFrame
             }
             else
             {
+                //Inform client cast failed & reset cast lockout
                 CastResultClientRpc(0, -1);
                 serverCastLockout = 0;
             }
@@ -127,7 +135,7 @@ namespace Hypersycos.RogueFrame
 
         [ServerRpc]
         private void DelayedCastServerRpc(Quaternion lookDirection)
-        {
+        { //send delayed camera angle to server
             lastCastRotation = lookDirection;
         }
 
@@ -136,11 +144,13 @@ namespace Hypersycos.RogueFrame
             while (NetworkManager.ServerTime.Time < expectedCastTime)
             {
                 if (castSpeed != 1)
-                {
+                { //account for cast speed per frame. Allows variable cast speed
+                    //and minimum computation in the usual case (1)
                     expectedCastTime += (1 - castSpeed) * Time.fixedDeltaTime;
                 }
                 yield return new WaitForFixedUpdate();
             }
+            //wait up to 250ms if haven't received new rotation
             float timeout = 0.25f;
             while (lastCastRotation == null && timeout > 0 )
             {
@@ -148,6 +158,7 @@ namespace Hypersycos.RogueFrame
                 yield return new WaitForFixedUpdate();
             }
             Ability delayedAbility = abilities[lastCastAbility];
+            //Use original cast state if new values not arrived
             Quaternion lookDirection = lastCastRotation ?? oldLookDirection;
             Vector3 cameraOffset = lastCastOffset ?? oldOffset;
             Vector3 cameraPosition = cameraRoot.position + cameraOffset;
